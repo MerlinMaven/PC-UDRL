@@ -121,5 +121,5 @@ Contributions are welcome! Please check the `documentation/contributing.rst` gui
 
 ---
 
-**Author**: [Your Name/Lab]
+**Author**: [Serraji Wiam]
 **Year**: 2025
