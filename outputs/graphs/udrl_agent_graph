@@ -1,0 +1,213 @@
+digraph {
+	graph [size="17.25,17.25"]
+	node [align=left fontname=monospace fontsize=10 height=0.2 ranksep=0.1 shape=box style=filled]
+	1998289189888 [label="
+ (1, 4)" fillcolor=darkolivegreen1]
+	1998287942848 -> 1998289189968 [dir=none]
+	1998289189968 [label="mat1
+ (1, 256)" fillcolor=orange]
+	1998287942848 -> 1998289189808 [dir=none]
+	1998289189808 [label="mat2
+ (256, 4)" fillcolor=orange]
+	1998287942848 [label="AddmmBackward0
+--------------------------------
+alpha           :              1
+beta            :              1
+mat1            : [saved tensor]
+mat1_sym_sizes  :       (1, 256)
+mat1_sym_strides:       (256, 1)
+mat2            : [saved tensor]
+mat2_sym_sizes  :       (256, 4)
+mat2_sym_strides:       (1, 256)"]
+	1998261612368 -> 1998287942848
+	1998289189088 [label="head.2.bias
+ (4)" fillcolor=lightblue]
+	1998289189088 -> 1998261612368
+	1998261612368 [label=AccumulateGrad]
+	1998288985472 -> 1998287942848
+	1998288985472 -> 1998289190288 [dir=none]
+	1998289190288 [label="result
+ (1, 256)" fillcolor=orange]
+	1998288985472 [label="ReluBackward0
+----------------------
+result: [saved tensor]"]
+	1998281864480 -> 1998288985472
+	1998281864480 -> 1998289189408 [dir=none]
+	1998289189408 [label="mat1
+ (1, 512)" fillcolor=orange]
+	1998281864480 -> 1998289190528 [dir=none]
+	1998289190528 [label="mat2
+ (512, 256)" fillcolor=orange]
+	1998281864480 [label="AddmmBackward0
+--------------------------------
+alpha           :              1
+beta            :              1
+mat1            : [saved tensor]
+mat1_sym_sizes  :       (1, 512)
+mat1_sym_strides:       (512, 1)
+mat2            : [saved tensor]
+mat2_sym_sizes  :     (512, 256)
+mat2_sym_strides:       (1, 512)"]
+	1998289264240 -> 1998281864480
+	1998289188928 [label="head.0.bias
+ (256)" fillcolor=lightblue]
+	1998289188928 -> 1998289264240
+	1998289264240 [label=AccumulateGrad]
+	1998289263808 -> 1998281864480
+	1998289263808 [label="CatBackward0
+---------------
+dim: 4294967295"]
+	1998289264048 -> 1998289263808
+	1998289264048 -> 1998289190848 [dir=none]
+	1998289190848 [label="result
+ (1, 256)" fillcolor=orange]
+	1998289264048 [label="ReluBackward0
+----------------------
+result: [saved tensor]"]
+	1998289263856 -> 1998289264048
+	1998289263856 -> 1998289189488 [dir=none]
+	1998289189488 [label="mat1
+ (1, 256)" fillcolor=orange]
+	1998289263856 -> 1998289404064 [dir=none]
+	1998289404064 [label="mat2
+ (256, 256)" fillcolor=orange]
+	1998289263856 [label="AddmmBackward0
+--------------------------------
+alpha           :              1
+beta            :              1
+mat1            : [saved tensor]
+mat1_sym_sizes  :       (1, 256)
+mat1_sym_strides:       (256, 1)
+mat2            : [saved tensor]
+mat2_sym_sizes  :     (256, 256)
+mat2_sym_strides:       (1, 256)"]
+	1998289264672 -> 1998289263856
+	1998289188368 [label="state_enc.2.bias
+ (256)" fillcolor=lightblue]
+	1998289188368 -> 1998289264672
+	1998289264672 [label=AccumulateGrad]
+	1998289264624 -> 1998289263856
+	1998289264624 -> 1998289404464 [dir=none]
+	1998289404464 [label="result
+ (1, 256)" fillcolor=orange]
+	1998289264624 [label="ReluBackward0
+----------------------
+result: [saved tensor]"]
+	1998289264768 -> 1998289264624
+	1998289264768 -> 1998289188448 [dir=none]
+	1998289188448 [label="mat1
+ (1, 2)" fillcolor=orange]
+	1998289264768 [label="AddmmBackward0
+--------------------------------
+alpha           :              1
+beta            :              1
+mat1            : [saved tensor]
+mat1_sym_sizes  :         (1, 2)
+mat1_sym_strides:             ()
+mat2            :           None
+mat2_sym_sizes  :       (2, 256)
+mat2_sym_strides:         (1, 2)"]
+	1998289265008 -> 1998289264768
+	1998289188208 [label="state_enc.0.bias
+ (256)" fillcolor=lightblue]
+	1998289188208 -> 1998289265008
+	1998289265008 [label=AccumulateGrad]
+	1998289264384 -> 1998289264768
+	1998289264384 [label=TBackward0]
+	1998289265392 -> 1998289264384
+	1998289186928 [label="state_enc.0.weight
+ (256, 2)" fillcolor=lightblue]
+	1998289186928 -> 1998289265392
+	1998289265392 [label=AccumulateGrad]
+	1998289264192 -> 1998289263856
+	1998289264192 [label=TBackward0]
+	1998240093216 -> 1998289264192
+	1998289188288 [label="state_enc.2.weight
+ (256, 256)" fillcolor=lightblue]
+	1998289188288 -> 1998240093216
+	1998240093216 [label=AccumulateGrad]
+	1998289264480 -> 1998289263808
+	1998289264480 -> 1998289405664 [dir=none]
+	1998289405664 [label="result
+ (1, 256)" fillcolor=orange]
+	1998289264480 [label="ReluBackward0
+----------------------
+result: [saved tensor]"]
+	1998289264912 -> 1998289264480
+	1998289264912 -> 1998289189728 [dir=none]
+	1998289189728 [label="mat1
+ (1, 256)" fillcolor=orange]
+	1998289264912 -> 1998289405904 [dir=none]
+	1998289405904 [label="mat2
+ (256, 256)" fillcolor=orange]
+	1998289264912 [label="AddmmBackward0
+--------------------------------
+alpha           :              1
+beta            :              1
+mat1            : [saved tensor]
+mat1_sym_sizes  :       (1, 256)
+mat1_sym_strides:       (256, 1)
+mat2            : [saved tensor]
+mat2_sym_sizes  :     (256, 256)
+mat2_sym_strides:       (1, 256)"]
+	1998289265488 -> 1998289264912
+	1998289188768 [label="cmd_enc.2.bias
+ (256)" fillcolor=lightblue]
+	1998289188768 -> 1998289265488
+	1998289265488 [label=AccumulateGrad]
+	1998289265248 -> 1998289264912
+	1998289265248 -> 1998289406304 [dir=none]
+	1998289406304 [label="result
+ (1, 256)" fillcolor=orange]
+	1998289265248 [label="ReluBackward0
+----------------------
+result: [saved tensor]"]
+	1998289265296 -> 1998289265248
+	1998289265296 -> 1998289189328 [dir=none]
+	1998289189328 [label="mat1
+ (1, 2)" fillcolor=orange]
+	1998289265296 [label="AddmmBackward0
+--------------------------------
+alpha           :              1
+beta            :              1
+mat1            : [saved tensor]
+mat1_sym_sizes  :         (1, 2)
+mat1_sym_strides:             ()
+mat2            :           None
+mat2_sym_sizes  :       (2, 256)
+mat2_sym_strides:         (1, 2)"]
+	1998289264720 -> 1998289265296
+	1998289188608 [label="cmd_enc.0.bias
+ (256)" fillcolor=lightblue]
+	1998289188608 -> 1998289264720
+	1998289264720 [label=AccumulateGrad]
+	1998289264816 -> 1998289265296
+	1998289264816 [label=TBackward0]
+	1998289265776 -> 1998289264816
+	1998289188528 [label="cmd_enc.0.weight
+ (256, 2)" fillcolor=lightblue]
+	1998289188528 -> 1998289265776
+	1998289265776 [label=AccumulateGrad]
+	1998289264576 -> 1998289264912
+	1998289264576 [label=TBackward0]
+	1998289265872 -> 1998289264576
+	1998289188688 [label="cmd_enc.2.weight
+ (256, 256)" fillcolor=lightblue]
+	1998289188688 -> 1998289265872
+	1998289265872 [label=AccumulateGrad]
+	1998289264336 -> 1998281864480
+	1998289264336 [label=TBackward0]
+	1998289265056 -> 1998289264336
+	1998289188848 [label="head.0.weight
+ (256, 512)" fillcolor=lightblue]
+	1998289188848 -> 1998289265056
+	1998289265056 [label=AccumulateGrad]
+	1998289264096 -> 1998287942848
+	1998289264096 [label=TBackward0]
+	1998287209280 -> 1998289264096
+	1998289189008 [label="head.2.weight
+ (4, 256)" fillcolor=lightblue]
+	1998289189008 -> 1998287209280
+	1998287209280 [label=AccumulateGrad]
+	1998287942848 -> 1998289189888
+}

@@ -1,0 +1,223 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expérimentations et Protocoles &mdash; PC-UDRL 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Results &amp; Benchmarks" href="results.html" />
+    <link rel="prev" title="Méthodologie Algorithmique" href="methodology.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PC-UDRL
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Cadre Théorique</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methodology.html">Méthodologie Algorithmique</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Expérimentations et Protocoles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#environnements-de-test">Environnements de Test</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gridworld-environnement-discret">1. GridWorld (Environnement Discret)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lunarlandercontinuous-v2-environnement-continu">2. LunarLanderContinuous-v2 (Environnement Continu)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#protocole-d-entrainement">Protocole d’Entraînement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hyperparametres">Hyperparamètres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#datasets">Datasets</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#metriques-d-evaluation">Métriques d’Évaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="results.html">Results &amp; Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="safety.html">Safety &amp; Robustness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ &amp; Deep Dive</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PC-UDRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Expérimentations et Protocoles</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/experiments.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="experimentations-et-protocoles">
+<h1>Expérimentations et Protocoles<a class="headerlink" href="#experimentations-et-protocoles" title="Link to this heading">¶</a></h1>
+<p>Cette section décrit rigoureusement les protocoles expérimentaux pour assurer la reproductibilité des résultats.</p>
+<section id="environnements-de-test">
+<h2>Environnements de Test<a class="headerlink" href="#environnements-de-test" title="Link to this heading">¶</a></h2>
+<section id="gridworld-environnement-discret">
+<h3>1. GridWorld (Environnement Discret)<a class="headerlink" href="#gridworld-environnement-discret" title="Link to this heading">¶</a></h3>
+<p>Environnement de navigation simple pour la preuve de concept.</p>
+<ul class="simple">
+<li><p><strong>Espace d’état</strong> : Coordonnées (x, y) normalisées <span class="math notranslate nohighlight">\([0, 1]^2\)</span>.</p></li>
+<li><p><strong>Espace d’action</strong> : Discret {Haut, Bas, Gauche, Droite}.</p></li>
+<li><p><strong>Dynamique</strong> : Déterministe sur les transitions.</p></li>
+<li><p><strong>Récompenses</strong> :</p>
+<ul>
+<li><p>Pas de temps : -1</p></li>
+<li><p>Mur : -0.5</p></li>
+<li><p>Piège : -10 (Terminal)</p></li>
+<li><p>Objectif : +10 (Terminal)</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="lunarlandercontinuous-v2-environnement-continu">
+<h3>2. LunarLanderContinuous-v2 (Environnement Continu)<a class="headerlink" href="#lunarlandercontinuous-v2-environnement-continu" title="Link to this heading">¶</a></h3>
+<p>Problème de contrôle optimal via le moteur physique Box2D.</p>
+<ul class="simple">
+<li><p><strong>Espace d’état</strong> : <span class="math notranslate nohighlight">\(\mathbb{R}^8\)</span> (Position, Vitesse, Angle, Vitesse Angulaire, Contact Sol).</p></li>
+<li><p><strong>Espace d’action</strong> : <span class="math notranslate nohighlight">\([-1, 1]^2\)</span> (Moteur Principal, Moteurs Latéraux).</p></li>
+<li><p><strong>Critère de succès</strong> : Atterrissage doux entre les drapeaux (Reward &gt; 200).</p></li>
+</ul>
+</section>
+</section>
+<section id="protocole-d-entrainement">
+<h2>Protocole d’Entraînement<a class="headerlink" href="#protocole-d-entrainement" title="Link to this heading">¶</a></h2>
+<section id="hyperparametres">
+<h3>Hyperparamètres<a class="headerlink" href="#hyperparametres" title="Link to this heading">¶</a></h3>
+<p>La table ci-dessous recense les hyperparamètres fixés pour toutes les expériences de la Phase 2.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Paramètre</p></th>
+<th class="head"><p>Valeur</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Optimizer</strong></p></td>
+<td><p>Adam</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Learning Rate</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(3 \times 10^{-4}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Batch Size</strong></p></td>
+<td><p>256</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Network Architecture</strong></p></td>
+<td><p>MLP (2 hidden layers, 256 units)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Activation</strong></p></td>
+<td><p>ReLU</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Horizon Max (Training)</strong></p></td>
+<td><p>200 (GridWorld), 1000 (LunarLander)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Pessimist Quantile</strong> (<span class="math notranslate nohighlight">\(\tau\)</span>)</p></td>
+<td><p>0.9 (GridWorld), 0.7 (LunarLander)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Training Epochs</strong></p></td>
+<td><p>30 (Checkpointing tous les 10)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="datasets">
+<h3>Datasets<a class="headerlink" href="#datasets" title="Link to this heading">¶</a></h3>
+<p>Pour assurer la robustesse <em>Offline</em>, nous générons des datasets synthétiques :</p>
+<ul class="simple">
+<li><p><strong>Random (GridWorld)</strong> : Politique uniforme. Couverture faible de l’objectif (20%).</p></li>
+<li><p><strong>Mixed (LunarLander)</strong> : Mélange conçu pour le benchmark D4RL :
+*   50% Trajectoires Expertes (PPO).
+*   30% Trajectoires Moyennes (Expert bruité, <span class="math notranslate nohighlight">\(\epsilon=0.3\)</span>).
+*   20% Trajectoires Aléatoires.</p></li>
+</ul>
+</section>
+</section>
+<section id="metriques-d-evaluation">
+<h2>Métriques d’Évaluation<a class="headerlink" href="#metriques-d-evaluation" title="Link to this heading">¶</a></h2>
+<p>Nous évaluons les agents selon trois axes :</p>
+<ol class="arabic simple">
+<li><p><strong>Performance Pure</strong> : Retour moyen normalisé sur 20 épisodes.</p></li>
+<li><p><strong>Sécurité</strong> : Nombre d’états terminaux “catastrophiques” visités.</p></li>
+<li><p><strong>Respect de la Commande</strong> : Erreur quadratique entre le retour demandé et obtenu (pour les commandes réalisables).</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="methodology.html" class="btn btn-neutral float-left" title="Méthodologie Algorithmique" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="results.html" class="btn btn-neutral float-right" title="Results &amp; Benchmarks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, User.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

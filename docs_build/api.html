@@ -1,0 +1,349 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; PC-UDRL 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="FAQ &amp; Deep Dive" href="faq.html" />
+    <link rel="prev" title="Safety &amp; Robustness" href="safety.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PC-UDRL
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Cadre Théorique</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methodology.html">Méthodologie Algorithmique</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Expérimentations et Protocoles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="results.html">Results &amp; Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="safety.html">Safety &amp; Robustness</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-pc_udrl.agents.udrl_agent">Agents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pc_udrl.agents.udrl_agent.UDRLAgent"><code class="docutils literal notranslate"><span class="pre">UDRLAgent</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pc_udrl.agents.udrl_agent.UDRLAgent.act"><code class="docutils literal notranslate"><span class="pre">UDRLAgent.act()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pc_udrl.agents.udrl_agent.UDRLAgent.forward"><code class="docutils literal notranslate"><span class="pre">UDRLAgent.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pc_udrl.pessimists.quantile">Pessimists</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pc_udrl.pessimists.quantile.QuantileRegressor"><code class="docutils literal notranslate"><span class="pre">QuantileRegressor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pc_udrl.pessimists.quantile.QuantileRegressor.forward"><code class="docutils literal notranslate"><span class="pre">QuantileRegressor.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pc_udrl.pessimists.quantile.QuantileRegressor.loss"><code class="docutils literal notranslate"><span class="pre">QuantileRegressor.loss()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pc_udrl.envs.gridworld">Environments</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pc_udrl.envs.gridworld.GridWorld"><code class="docutils literal notranslate"><span class="pre">GridWorld</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pc_udrl.envs.gridworld.GridWorld.action_space"><code class="docutils literal notranslate"><span class="pre">GridWorld.action_space</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pc_udrl.envs.gridworld.GridWorld.observation_space"><code class="docutils literal notranslate"><span class="pre">GridWorld.observation_space</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pc_udrl.envs.gridworld.GridWorld.render"><code class="docutils literal notranslate"><span class="pre">GridWorld.render()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pc_udrl.envs.gridworld.GridWorld.reset"><code class="docutils literal notranslate"><span class="pre">GridWorld.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pc_udrl.envs.gridworld.GridWorld.sample_action"><code class="docutils literal notranslate"><span class="pre">GridWorld.sample_action()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pc_udrl.envs.gridworld.GridWorld.step"><code class="docutils literal notranslate"><span class="pre">GridWorld.step()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pc_udrl.data.dataset">Data Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pc_udrl.data.dataset.OfflineDataset"><code class="docutils literal notranslate"><span class="pre">OfflineDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pc_udrl.data.dataset.OfflineDataset.exists"><code class="docutils literal notranslate"><span class="pre">OfflineDataset.exists()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pc_udrl.data.dataset.OfflineDataset.generate"><code class="docutils literal notranslate"><span class="pre">OfflineDataset.generate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pc_udrl.data.dataset.OfflineDataset.load"><code class="docutils literal notranslate"><span class="pre">OfflineDataset.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pc_udrl.data.dataset.OfflineDataset.split_train_val"><code class="docutils literal notranslate"><span class="pre">OfflineDataset.split_train_val()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ &amp; Deep Dive</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PC-UDRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h1>
+<p>This section documents the core modules of the PC-UDRL package.</p>
+<section id="module-pc_udrl.agents.udrl_agent">
+<span id="agents"></span><h2>Agents<a class="headerlink" href="#module-pc_udrl.agents.udrl_agent" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pc_udrl.agents.udrl_agent.UDRLAgent">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pc_udrl.agents.udrl_agent.</span></span><span class="sig-name descname"><span class="pre">UDRLAgent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discrete</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pc_udrl/agents/udrl_agent.html#UDRLAgent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.agents.udrl_agent.UDRLAgent" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Upside-Down Reinforcement Learning (UDRL) Agent.</p>
+<p>This agent predicts the optimal action given a state and a command (horizon, desired_return).
+It learns via supervised learning to mimic trajectories that achieved high returns, effectively
+inverting the RL problem (mapping Command -&gt; Action).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state_dim</strong> (<em>int</em>) – Dimension of the observation space.</p></li>
+<li><p><strong>action_dim</strong> (<em>int</em>) – Dimension of the action space.</p></li>
+<li><p><strong>discrete</strong> (<em>bool</em>) – Whether the action space is discrete (True) or continuous (False).</p></li>
+<li><p><strong>hidden_dim</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of the hidden layers. Defaults to 256.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pc_udrl.agents.udrl_agent.UDRLAgent.act">
+<span class="sig-name descname"><span class="pre">act</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desired_return</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pc_udrl/agents/udrl_agent.html#UDRLAgent.act"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.agents.udrl_agent.UDRLAgent.act" title="Link to this definition">¶</a></dt>
+<dd><p>Selects an action for the given state and command during inference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<em>torch.Tensor</em>) – Current state.</p></li>
+<li><p><strong>horizon</strong> (<em>torch.Tensor</em>) – Desired horizon.</p></li>
+<li><p><strong>desired_return</strong> (<em>torch.Tensor</em>) – Desired return.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Selected action (index for discrete, tensor for continuous).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor or int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pc_udrl.agents.udrl_agent.UDRLAgent.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">horizon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desired_return</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pc_udrl/agents/udrl_agent.html#UDRLAgent.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.agents.udrl_agent.UDRLAgent.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass for the UDRL agent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<em>torch.Tensor</em>) – Current state observation.</p></li>
+<li><p><strong>horizon</strong> (<em>torch.Tensor</em>) – Remaining time steps/horizon.</p></li>
+<li><p><strong>desired_return</strong> (<em>torch.Tensor</em>) – Desired return-to-go.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Predicted action logits (discrete) or values (continuous).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pc_udrl.pessimists.quantile">
+<span id="pessimists"></span><h2>Pessimists<a class="headerlink" href="#module-pc_udrl.pessimists.quantile" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pc_udrl.pessimists.quantile.QuantileRegressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pc_udrl.pessimists.quantile.</span></span><span class="sig-name descname"><span class="pre">QuantileRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pc_udrl/pessimists/quantile.html#QuantileRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.pessimists.quantile.QuantileRegressor" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Pessimistic Oracle using Quantile Regression.</p>
+<p>Predicts the tau-th quantile of the return distribution for a given state.
+Used to clamp user commands to a realistic/safe range, implementing the
+concept of “Pessimistic Projection”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state_dim</strong> (<em>int</em>) – Dimension of the observation space.</p></li>
+<li><p><strong>hidden_dim</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of the hidden layers. Defaults to 256.</p></li>
+<li><p><strong>q</strong> (<em>float</em><em>, </em><em>optional</em>) – Quantile to predict (e.g., 0.9 for 90th percentile). Defaults to 0.9.</p></li>
+<li><p><strong>cfg</strong> (<em>Any</em><em>, </em><em>optional</em>) – Configuration object containing device settings.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pc_udrl.pessimists.quantile.QuantileRegressor.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/pc_udrl/pessimists/quantile.html#QuantileRegressor.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.pessimists.quantile.QuantileRegressor.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Predicts the return quantile for the given state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state</strong> (<em>torch.Tensor</em>) – State observation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Predicted return value (scalar).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pc_udrl.pessimists.quantile.QuantileRegressor.loss">
+<span class="sig-name descname"><span class="pre">loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/pc_udrl/pessimists/quantile.html#QuantileRegressor.loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.pessimists.quantile.QuantileRegressor.loss" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the Quantile Huber Loss (Pinball Loss).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pred</strong> (<em>torch.Tensor</em>) – Predicted quantiles.</p></li>
+<li><p><strong>target</strong> (<em>torch.Tensor</em>) – Actual returns (targets).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Scalar loss value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pc_udrl.envs.gridworld">
+<span id="environments"></span><h2>Environments<a class="headerlink" href="#module-pc_udrl.envs.gridworld" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pc_udrl.envs.gridworld.GridWorld">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pc_udrl.envs.gridworld.</span></span><span class="sig-name descname"><span class="pre">GridWorld</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pc_udrl/envs/gridworld.html#GridWorld"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.envs.gridworld.GridWorld" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pc_udrl.envs.gridworld.GridWorld.action_space">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_space</span></span><a class="headerlink" href="#pc_udrl.envs.gridworld.GridWorld.action_space" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pc_udrl.envs.gridworld.GridWorld.observation_space">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">observation_space</span></span><a class="headerlink" href="#pc_udrl.envs.gridworld.GridWorld.observation_space" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pc_udrl.envs.gridworld.GridWorld.render">
+<span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'rgb_array'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_px</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">32</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">uint8</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/pc_udrl/envs/gridworld.html#GridWorld.render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.envs.gridworld.GridWorld.render" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pc_udrl.envs.gridworld.GridWorld.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pc_udrl/envs/gridworld.html#GridWorld.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.envs.gridworld.GridWorld.reset" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pc_udrl.envs.gridworld.GridWorld.sample_action">
+<span class="sig-name descname"><span class="pre">sample_action</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pc_udrl/envs/gridworld.html#GridWorld.sample_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.envs.gridworld.GridWorld.sample_action" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pc_udrl.envs.gridworld.GridWorld.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pc_udrl/envs/gridworld.html#GridWorld.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.envs.gridworld.GridWorld.step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pc_udrl.data.dataset">
+<span id="data-pipeline"></span><h2>Data Pipeline<a class="headerlink" href="#module-pc_udrl.data.dataset" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pc_udrl.data.dataset.OfflineDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pc_udrl.data.dataset.</span></span><span class="sig-name descname"><span class="pre">OfflineDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pc_udrl/data/dataset.html#OfflineDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.data.dataset.OfflineDataset" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pc_udrl.data.dataset.OfflineDataset.exists">
+<span class="sig-name descname"><span class="pre">exists</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pc_udrl/data/dataset.html#OfflineDataset.exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.data.dataset.OfflineDataset.exists" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pc_udrl.data.dataset.OfflineDataset.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/pc_udrl/data/dataset.html#OfflineDataset.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.data.dataset.OfflineDataset.generate" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pc_udrl.data.dataset.OfflineDataset.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pc_udrl/data/dataset.html#OfflineDataset.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.data.dataset.OfflineDataset.load" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pc_udrl.data.dataset.OfflineDataset.split_train_val">
+<span class="sig-name descname"><span class="pre">split_train_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Subset</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Subset</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/pc_udrl/data/dataset.html#OfflineDataset.split_train_val"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pc_udrl.data.dataset.OfflineDataset.split_train_val" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="safety.html" class="btn btn-neutral float-left" title="Safety &amp; Robustness" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="faq.html" class="btn btn-neutral float-right" title="FAQ &amp; Deep Dive" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, User.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

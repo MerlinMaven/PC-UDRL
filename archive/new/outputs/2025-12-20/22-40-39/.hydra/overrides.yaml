@@ -1,0 +1,3 @@
+- mode=train
+- phase=3
+- method=cvae

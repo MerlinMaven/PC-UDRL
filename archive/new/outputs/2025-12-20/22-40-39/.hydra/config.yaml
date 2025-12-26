@@ -1,0 +1,26 @@
+phase: 3
+env_id: GridWorld
+method: cvae
+seed: 0
+device: cpu
+dataset_dir: data
+runs_dir: runs
+episodes: 1000
+max_steps: 200
+gamma: 0.99
+batch_size: 256
+lr_agent: 0.0003
+lr_pessimist: 0.0003
+hidden_dim: 256
+pessimist_quantile: 0.9
+cvae_latent_dim: 16
+eval_episodes: 20
+diff_timesteps: 100
+mode: train
+capture_video: false
+show: false
+baselines:
+- td3bc
+- iql
+- cql
+- dt

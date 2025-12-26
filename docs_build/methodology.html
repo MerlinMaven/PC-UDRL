@@ -1,0 +1,233 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Méthodologie Algorithmique &mdash; PC-UDRL 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Expérimentations et Protocoles" href="experiments.html" />
+    <link rel="prev" title="Cadre Théorique" href="theory.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PC-UDRL
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Cadre Théorique</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Méthodologie Algorithmique</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline-d-entrainement-standard">1. Pipeline d’Entraînement Standard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#algorithme-de-projection-a-l-inference">2. Algorithme de Projection à l’Inférence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gestion-des-donnees-dataset">3. Gestion des Données (Dataset)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture-reseau">4. Architecture Réseau</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#algorithme-complet-pseudo-code">5. Algorithme Complet (Pseudo-Code)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#au-dela-des-quantiles-modeles-generatifs-phase-3">6. Au-delà des Quantiles : Modèles Génératifs (Phase 3)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Expérimentations et Protocoles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="results.html">Results &amp; Benchmarks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="safety.html">Safety &amp; Robustness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ &amp; Deep Dive</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PC-UDRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Méthodologie Algorithmique</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/methodology.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="methodologie-algorithmique">
+<h1>Méthodologie Algorithmique<a class="headerlink" href="#methodologie-algorithmique" title="Link to this heading">¶</a></h1>
+<p>Cette section détaille l’implémentation de l’architecture <strong>Pessimistic Command UDRL</strong>.</p>
+<section id="pipeline-d-entrainement-standard">
+<h2>1. Pipeline d’Entraînement Standard<a class="headerlink" href="#pipeline-d-entrainement-standard" title="Link to this heading">¶</a></h2>
+<p>L’entraînement se déroule en deux étapes indépendantes, ce qui garantit la stabilité du processus (pas de boucle de rétroaction instable comme en Actor-Critic).</p>
+<p><strong>Étape A : Entraînement de l’Agent UDRL</strong></p>
+<p>L’agent est un réseau de neurones <span class="math notranslate nohighlight">\(\pi_\phi(a | s, h, r)\)</span> entrainé par apprentissage supervisé.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pseudo-code PyTorch</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">(</span><span class="n">pred_action</span><span class="p">,</span> <span class="n">target_action</span><span class="p">)</span>  <span class="c1"># Cas continu</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropy</span><span class="p">(</span><span class="n">pred_logits</span><span class="p">,</span> <span class="n">target_action_idx</span><span class="p">)</span> <span class="c1"># Cas discret</span>
+</pre></div>
+</div>
+<p><strong>Hyperparamètres Clés (Phase 2)</strong> :
+*   Optimiseur : AdamW (<span class="math notranslate nohighlight">\(lr=3e^{-4}\)</span>, <span class="math notranslate nohighlight">\(\beta=(0.9, 0.999)\)</span>)
+*   Batch Size : 256
+*   Fonction d’activation : ReLU (couches cachées), Tanh (sortie continue)</p>
+<p><strong>Étape B : Entraînement du Pessimiste (Oracle)</strong></p>
+<p>Le pessimiste est un régresseur quantile <span class="math notranslate nohighlight">\(f_\psi(s) \rightarrow \hat{r}_\tau\)</span>.
+Il ne prend <em>pas</em> la commande en entrée, uniquement l’état. Il prédit “ce qui est possible depuis l’état <span class="math notranslate nohighlight">\(s\)</span>”.</p>
+</section>
+<section id="algorithme-de-projection-a-l-inference">
+<h2>2. Algorithme de Projection à l’Inférence<a class="headerlink" href="#algorithme-de-projection-a-l-inference" title="Link to this heading">¶</a></h2>
+<p>Lors de l’évaluation, l’agent ne reçoit jamais la commande brute de l’utilisateur. Elle passe par un filtre de sécurité.</p>
+<div class="math notranslate nohighlight">
+\[\text{SafePolicy}(s_t, r_{target}, h_{target}) = \pi_\phi \left( s_t, \min(r_{target}, Q_\tau(s_t)), h_{target} \right)\]</div>
+<p><strong>Détail du calcul du Pessimism Gap</strong> :
+Le <em>Pessimism Gap</em> quantifie l’intervention du système de sécurité.</p>
+<div class="math notranslate nohighlight">
+\[\Delta_{gap} = \max(0, r_{target} - Q_\tau(s_t))\]</div>
+<ul class="simple">
+<li><p>Si <span class="math notranslate nohighlight">\(\Delta_{gap} &gt; 0\)</span>, la commande était irréaliste/dangereuse.</p></li>
+<li><p>Si <span class="math notranslate nohighlight">\(\Delta_{gap} = 0\)</span>, la commande est jugée sûre.</p></li>
+</ul>
+</section>
+<section id="gestion-des-donnees-dataset">
+<h2>3. Gestion des Données (Dataset)<a class="headerlink" href="#gestion-des-donnees-dataset" title="Link to this heading">¶</a></h2>
+<p>La qualité du dataset conditionne la performance. Nous utilisons le format standard HDF5.</p>
+<p><strong>Structure des données</strong> :
+*   <cite>observations</cite>: <span class="math notranslate nohighlight">\((N, S_{dim})\)</span>
+*   <cite>actions</cite>: <span class="math notranslate nohighlight">\((N, A_{dim})\)</span>
+*   <cite>rewards</cite>: <span class="math notranslate nohighlight">\((N, 1)\)</span>
+*   <cite>terminals</cite>: <span class="math notranslate nohighlight">\((N, 1)\)</span></p>
+<p>L’horizon <span class="math notranslate nohighlight">\(h\)</span> et le retour cumulé <span class="math notranslate nohighlight">\(r\)</span> sont calculés à la volée lors du chargement (Lazy Loading) pour économiser la mémoire et permettre du <em>Hindsight Relabeling</em> dynamique si nécessaire.</p>
+</section>
+<section id="architecture-reseau">
+<h2>4. Architecture Réseau<a class="headerlink" href="#architecture-reseau" title="Link to this heading">¶</a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>State Input (8) ───► [FC 256] ──► [ReLU] ──┐
+                                           ▼
+Command Input (2) ─► [FC 256] ──► [ReLU] ──► [Concat] ──► [FC 256] ──► [Action Output]
+</pre></div>
+</div>
+<p>71: Cette architecture <em>Late Fusion</em> permet au réseau de traiter les caractéristiques de l’état indépendamment de la commande avant de les combiner pour la décision.</p>
+</section>
+<section id="algorithme-complet-pseudo-code">
+<h2>5. Algorithme Complet (Pseudo-Code)<a class="headerlink" href="#algorithme-complet-pseudo-code" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">Run_Episode</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">pessimist</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">target_return</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+    <span class="n">horizon</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">max_steps</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">max_steps</span><span class="p">):</span>
+        <span class="c1"># 1. Pessimistic Projection</span>
+        <span class="c1"># Le pessimiste prédit le retour réalisable (quantile 0.1)</span>
+        <span class="n">feasible_return</span> <span class="o">=</span> <span class="n">pessimist</span><span class="o">.</span><span class="n">predict_quantile</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="c1"># 2. Safety Check (Min Operator)</span>
+        <span class="c1"># On ne demande jamais plus que ce qui est réalisable</span>
+        <span class="n">safe_command</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">target_return</span><span class="p">,</span> <span class="n">feasible_return</span><span class="p">)</span>
+
+        <span class="c1"># 3. Action Selection</span>
+        <span class="c1"># L&#39;agent exécute la commande safe</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">safe_command</span><span class="p">)</span>
+
+        <span class="c1"># 4. Environment Step</span>
+        <span class="n">next_state</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+        <span class="c1"># 5. Update State</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">next_state</span>
+        <span class="n">horizon</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">target_return</span> <span class="o">-=</span> <span class="n">reward</span> <span class="c1"># La commande restante diminue</span>
+
+        <span class="k">if</span> <span class="n">done</span><span class="p">:</span> <span class="k">break</span>
+</pre></div>
+</div>
+</section>
+<section id="au-dela-des-quantiles-modeles-generatifs-phase-3">
+<h2>6. Au-delà des Quantiles : Modèles Génératifs (Phase 3)<a class="headerlink" href="#au-dela-des-quantiles-modeles-generatifs-phase-3" title="Link to this heading">¶</a></h2>
+<p>Pourquoi passer de la régression quantile aux modèles génératifs ?</p>
+<p><strong>Limites de la Régression Quantile</strong></p>
+<ul class="simple">
+<li><p><strong>Hypothèse Unimodale</strong> : QR suppose implicitement que la distribution des retours est “simple” (un seul pic principal).</p></li>
+<li><p><strong>Manque de Précision</strong> : Elle ne donne qu’une borne (un chiffre), pas la forme de la distribution.</p></li>
+</ul>
+<p><strong>A. Conditional VAE (Variational Autoencoder)</strong>
+Le CVAE apprend à modéliser la densité complète <span class="math notranslate nohighlight">\(p(r, h | s)\)</span>.</p>
+<ul class="simple">
+<li><p><strong>Idée</strong> : Projeter la commande sur le <em>manifold</em> latent des commandes possibles.</p></li>
+<li><p><strong>Avantage</strong> : Permet de trouver la commande “la plus proche” dans l’espace latent continu, assurant une transition douce.</p></li>
+</ul>
+<p><strong>B. Diffusion Models (Denoising Diffusion)</strong>
+La méthode de l’état de l’art pour la génération.</p>
+<ul class="simple">
+<li><p><strong>Idée</strong> : Apprendre le gradient de la log-densité (Score Matching) des commandes <span class="math notranslate nohighlight">\(\nabla_{(r,h)} \log p(r, h | s)\)</span>.</p></li>
+<li><p><strong>Processus</strong> : On part d’une commande bruitée (random) et on la “débruite” itérativement conditionnellement à l’état <span class="math notranslate nohighlight">\(s\)</span>.</p></li>
+<li><p><strong>Résultat</strong> : Capacité à modéliser des distributions multimodales complexes (e.g., soit on gagne petit à coup sûr, soit on gagne gros avec risque, mais rien entre les deux).</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Pour les résultats expérimentaux de ces méthodes, voir la section “Phase 3” dans <span class="xref std std-ref">results</span>.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="theory.html" class="btn btn-neutral float-left" title="Cadre Théorique" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="experiments.html" class="btn btn-neutral float-right" title="Expérimentations et Protocoles" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, User.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

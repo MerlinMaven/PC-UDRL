@@ -1,0 +1,2 @@
+[console_scripts]
+pcudrl-hydra = main_hydra:main

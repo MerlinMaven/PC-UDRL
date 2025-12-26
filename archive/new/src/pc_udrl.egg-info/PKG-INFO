@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: pc-udrl
+Version: 0.1.0
+Summary: Offline UDRL with Pessimistic Command Generation
+Dynamic: summary

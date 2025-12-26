@@ -1,0 +1,12 @@
+
+6. Extensions et perspectives
+-----------------------------
+- Multi-agent, projection hiérarchique, continual learning, certification formelle.
+
+7. Originalité
+--------------
+- Pessimisme sur commandes (1ère contribution)
+- Usage de générateurs pour le manifold (2ème contribution)
+- Unification sécurité/performance sans régularisation Q/π (3ème contribution)
+
+Pour plus de détails, voir la section "Approches et Innovations" dans cette documentation.
