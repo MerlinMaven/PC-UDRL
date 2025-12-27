@@ -46,16 +46,18 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Cadre Théorique</a></li>
-<li class="toctree-l1"><a class="reference internal" href="methodology.html">Méthodologie</a></li>
-<li class="toctree-l1"><a class="reference internal" href="experiments.html">Experiments Strategy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methodology.html">Méthodologie Algorithmique</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Protocole Expérimental</a></li>
 <li class="toctree-l1"><a class="reference internal" href="results.html">Results &amp; Benchmarks</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Safety &amp; Robustness</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#structural-safety-by-design">Structural Safety by Design</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#the-pessimism-mechanism">The Pessimism Mechanism</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-pessimism-mechanism-as-a-shield">The Pessimism Mechanism as a Shield</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#the-obedient-suicide-phenomenon">The “Obedient Suicide” Phenomenon</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#comparison-with-action-space-constraints">Comparison with Action-Space Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#robustness-metrics-cvar">Robustness Metrics: CVaR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-fail-safe-phenomenon">The “Fail-Safe” Phenomenon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#real-time-observability-the-pessimism-gap">Real-Time Observability: The Pessimism Gap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#comparison-with-state-of-the-art">Comparison with State-of-the-Art</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
@@ -89,33 +91,65 @@
              
   <section id="safety-robustness">
 <h1>Safety &amp; Robustness<a class="headerlink" href="#safety-robustness" title="Link to this heading">¶</a></h1>
+<div class="important admonition">
+<p class="admonition-title">Core Philosophy</p>
+<p>In critical systems (robotics, finance, healthcare), <strong>Safety</strong> (avoiding catastrophic failure) often outweighs <strong>Performance</strong> (maximizing total reward). PC-UDRL is designed with this “Safety-First” mindset.</p>
+</div>
 <section id="structural-safety-by-design">
 <h2>Structural Safety by Design<a class="headerlink" href="#structural-safety-by-design" title="Link to this heading">¶</a></h2>
-<p>In traditional Offline RL (e.g., CQL, IQL), safety is often a byproduct of regularization: the algorithm is penalized for deviating from the behavioral policy. <strong>PC-UDRL</strong> takes a different approach: <strong>Safety by Command Projection</strong>.</p>
-<p>Instead of hoping the policy learns to be safe, we explicitly <strong>constrain the command</strong> given to the policy.</p>
-<section id="the-pessimism-mechanism">
-<h3>The Pessimism Mechanism<a class="headerlink" href="#the-pessimism-mechanism" title="Link to this heading">¶</a></h3>
-<p>The core safety component is the <strong>Pessimist</strong> (or Oracle), denoted as <span class="math notranslate nohighlight">\(\mathcal{P}\)</span>.
-For a given state <span class="math notranslate nohighlight">\(s_t\)</span>, the pessimist estimates the distribution of feasible future returns:</p>
+<p>In traditional Offline RL (e.g., CQL, IQL), safety is often a byproduct of regularization: the algorithm is penalized for deviating from the behavioral policy. <strong>PC-UDRL</strong> takes a deterministic approach: <strong>Safety by Command Projection</strong>.</p>
+<p>Instead of hoping the policy learns to be safe implicitly, we explicitly <strong>constrain the command</strong> given to the policy.</p>
+<section id="the-pessimism-mechanism-as-a-shield">
+<h3>The Pessimism Mechanism as a Shield<a class="headerlink" href="#the-pessimism-mechanism-as-a-shield" title="Link to this heading">¶</a></h3>
+<p>The core safety component is the <strong>Pessimist</strong> (or Oracle), denoted as <span class="math notranslate nohighlight">\(\mathcal{P}\)</span>. It acts as a dynamic firewall between the user and the agent.</p>
+<p>For a given state <span class="math notranslate nohighlight">\(s_t\)</span>, the pessimist estimates the distribution of feasible future returns:</p>
 <div class="math notranslate nohighlight">
 \[Q_\tau(s_t) = \text{Quantile}_\tau [ R_{future} | s_t ]\]</div>
-<p>If a user requests a target return <span class="math notranslate nohighlight">\(r_{cmd} = +100\)</span>, but the pessimist determines that the 10th percentile of feasible returns from <span class="math notranslate nohighlight">\(s_t\)</span> is only <span class="math notranslate nohighlight">\(-50\)</span>, the command is <strong>clamped</strong>:</p>
+<p>If a user requests a target return <span class="math notranslate nohighlight">\(r_{cmd} = +100\)</span> (Optimization Goal), but the pessimist determines that the 10th percentile of feasible returns is only <span class="math notranslate nohighlight">\(-50\)</span> (Safety Boundary), the command is <strong>clamped</strong>:</p>
 <div class="math notranslate nohighlight">
 \[r_{safe} = \min(r_{cmd}, Q_\tau(s_t))\]</div>
-<p>This acts as a “safety shield,” preventing the agent from pursuing unrealistic goals that would likely lead to out-of-distribution (OOD) states and catastrophic failure.</p>
+<a class="reference internal image-reference" href="../assets/gap_analysis.png"><img alt="Safety Shield Mechanism (Gap Analysis)" class="align-center" src="../assets/gap_analysis.png" style="width: 600px;" /></a>
+<p>This diagram illustrates the “Shielding” effect: the Agent never sees the impossible command. It only sees a command that lies within the <strong>Safe Feasible Manifold</strong>.</p>
 </section>
 </section>
-<section id="the-obedient-suicide-phenomenon">
-<h2>The “Obedient Suicide” Phenomenon<a class="headerlink" href="#the-obedient-suicide-phenomenon" title="Link to this heading">¶</a></h2>
-<p>During Phase 1 (GridWorld), we observed a counter-intuitive behavior:
-The agent, when capped to a low return (e.g., -10), would sometimes <strong>intentionally</strong> move towards a trap.</p>
+<section id="robustness-metrics-cvar">
+<h2>Robustness Metrics: CVaR<a class="headerlink" href="#robustness-metrics-cvar" title="Link to this heading">¶</a></h2>
+<p>To quantify robustness, we do not look at the <em>Average Return</em>, but at the <strong>Conditional Value at Risk (CVaR)</strong>.</p>
+<div class="math notranslate nohighlight">
+\[\text{CVaR}_\alpha = \mathbb{E}[R \mid R \le \text{VaR}_\alpha]\]</div>
 <ul class="simple">
-<li><p><strong>Explanation</strong>: The UDRL agent is trained to <em>satisfy</em> the command, not maximize reward. If the only robustly known path leads to a -10 outcome (the trap), and the command is clamped to -10, the agent interprets hitting the trap as “mission accomplished.”</p></li>
-<li><p><strong>Implication</strong>: This validates that the agent is controllable. In a safety context, it is often better to accept a minor known loss (controlled landing, emergency stop) than to gamble on a high reward that carries the risk of total system loss.</p></li>
+<li><p><strong>Standard RL</strong> optimizes for <span class="math notranslate nohighlight">\(\mathbb{E}[R]\)</span> (Average case).</p></li>
+<li><p><strong>PC-UDRL</strong> optimizes for <span class="math notranslate nohighlight">\(\text{CVaR}_{0.1}\)</span> (Worst-case scenario).</p></li>
 </ul>
+<p>By clamping commands with a low quantile (<span class="math notranslate nohighlight">\(\tau=0.1\)</span>), we effectively maximize the CVaR, guaranteeing that even in the worst 10% of scenarios, the outcome is controlled.</p>
 </section>
-<section id="comparison-with-action-space-constraints">
-<h2>Comparison with Action-Space Constraints<a class="headerlink" href="#comparison-with-action-space-constraints" title="Link to this heading">¶</a></h2>
+<section id="the-fail-safe-phenomenon">
+<h2>The “Fail-Safe” Phenomenon<a class="headerlink" href="#the-fail-safe-phenomenon" title="Link to this heading">¶</a></h2>
+<p>During Phase 1 (GridWorld), we observed a specific behavior where the agent, when capped to a low return (e.g., -10), would intentionally move towards a trap (-10 penalty) rather than wandering aimlessly (-100 penalty).</p>
+<p>This is not a bug, but a <strong>Fail-Safe Mechanism</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Certainty vs. Ambiguity</strong>: The agent chooses a <em>known</em> negative outcome over an <em>unknown</em> catastrophic one.</p></li>
+<li><p><strong>Controllability</strong>: It proves the agent is strictly obedient. In an autonomous vehicle context, this equates to choosing a “controlled stop in a ditch” (minor damage) over “continuing at high speed on ice” (risk of total fatality).</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is better to accept a minor known loss (controlled landing, emergency stop) than to gamble on a high reward that carries the risk of Out-of-Distribution (OOD) failure.</p>
+</div>
+</section>
+<section id="real-time-observability-the-pessimism-gap">
+<h2>Real-Time Observability: The Pessimism Gap<a class="headerlink" href="#real-time-observability-the-pessimism-gap" title="Link to this heading">¶</a></h2>
+<p>Typical RL agents are “black boxes”: we don’t know they are failing until they crash.
+PC-UDRL introduces a novel supervisory signal: the <strong>Pessimism Gap</strong>.</p>
+<div class="math notranslate nohighlight">
+\[\Delta_t = r_{cmd} - r_{safe}\]</div>
+<ul class="simple">
+<li><p><strong>Green Zone</strong> (<span class="math notranslate nohighlight">\(\Delta \approx 0\)</span>): The user’s request is realistic.</p></li>
+<li><p><strong>Red Zone</strong> (<span class="math notranslate nohighlight">\(\Delta \gg 0\)</span>): The user is asking for the impossible (or the environment has degraded).</p></li>
+</ul>
+<p><strong>Application:</strong> This signal can be utilized as a <strong>Runtime Anomaly Detector</strong>, triggering alarms or handing control back to a human operator <em>before</em> the agent takes any action.</p>
+</section>
+<section id="comparison-with-state-of-the-art">
+<h2>Comparison with State-of-the-Art<a class="headerlink" href="#comparison-with-state-of-the-art" title="Link to this heading">¶</a></h2>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Feature</p></th>
@@ -134,7 +168,7 @@ The agent, when capped to a low return (e.g., -10), would sometimes <strong>inte
 </tr>
 <tr class="row-even"><td><p><strong>Flexibility</strong></p></td>
 <td><p>Hard to tune post-training</p></td>
-<td><p>Tunable at inference (Quantile)</p></td>
+<td><p><strong>Tunable at inference</strong></p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>Interpretability</strong></p></td>
 <td><p>Low (Black box policy)</p></td>
@@ -142,12 +176,13 @@ The agent, when capped to a low return (e.g., -10), would sometimes <strong>inte
 </tr>
 </tbody>
 </table>
+<p><strong>Key Advantage:</strong> The flexibility of PC-UDRL allows us to adjust the “Caution Level” (the quantile <span class="math notranslate nohighlight">\(\tau\)</span>) in real-time without retraining the agent, which is impossible with CQL.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p><strong>Safety in RL</strong>: Amodei, D., et al. (2016). “Concrete Problems in AI Safety.” <em>arXiv preprint arXiv:1606.06565</em>.</p></li>
-<li><p><strong>Offline RL Surveys</strong>: Levine, S., et al. (2020). “Offline Reinforcement Learning: Tutorial, Review, and Perspectives on Open Problems.” <em>arXiv preprint arXiv:2005.01643</em>.</p></li>
+<li><p><strong>Safety in RL</strong>: Amodei, D., et al. (2016). “Concrete Problems in AI Safety.” <a class="reference external" href="https://arxiv.org/abs/1606.06565">[arXiv:1606.06565]</a></p></li>
+<li><p><strong>Offline RL Surveys</strong>: Levine, S., et al. (2020). “Offline Reinforcement Learning: Tutorial, Review, and Perspectives on Open Problems.” <a class="reference external" href="https://arxiv.org/abs/2005.01643">[arXiv:2005.01643]</a></p></li>
 </ul>
 </section>
 </section>

@@ -2,8 +2,8 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from pc_udrl.pessimists.quantile import QuantileRegressor
-# from pc_udrl.pessimists.cvae import CVAEPessimist
-# from pc_udrl.pessimists.diffusion import CondDiffusion
+from pc_udrl.pessimists.cvae import CVAEPessimist
+from pc_udrl.pessimists.diffusion import CondDiffusion
 from pc_udrl.utils import Logger, save_checkpoint, get_device, set_global_seed
 
 
@@ -19,10 +19,10 @@ def train_pessimist(cfg, dataset):
     state_dim = dataset.data["obs"].shape[1]
     if cfg.method == "quantile":
         model = QuantileRegressor(state_dim, hidden_dim=cfg.hidden_dim, q=cfg.pessimist_quantile, cfg=cfg)
-    # elif cfg.method == "cvae":
-    #     model = CVAEPessimist(state_dim, latent_dim=cfg.cvae_latent_dim, hidden_dim=cfg.hidden_dim, cfg=cfg)
-    # elif cfg.method == "diffusion":
-    #     model = CondDiffusion(state_dim, hidden_dim=cfg.hidden_dim, cfg=cfg, timesteps=getattr(cfg, "diff_timesteps", 100))
+    elif cfg.method == "cvae":
+        model = CVAEPessimist(state_dim, latent_dim=cfg.cvae_latent_dim, hidden_dim=cfg.hidden_dim, cfg=cfg)
+    elif cfg.method == "diffusion":
+        model = CondDiffusion(state_dim, hidden_dim=cfg.hidden_dim, cfg=cfg, timesteps=100)
     else:
         raise ValueError("unknown method or method not supported in Phase 1 isolated mode")
     opt = torch.optim.Adam(model.parameters(), lr=cfg.lr_pessimist)
@@ -37,11 +37,18 @@ def train_pessimist(cfg, dataset):
         for s, h, dr, a in train_loader:
             s = s.to(device)
             dr = dr.to(device)
+            h = h.to(device) # Make sure h is on device
             if cfg.method == "quantile":
                 pred = model(s)
                 loss = model.loss(pred, dr)
-            # elif cfg.method == "cvae":
-            #     loss = model.elbo(s, dr)
+            elif cfg.method == "cvae":
+                loss = model.elbo(s, h, dr)
+            elif cfg.method == "diffusion":
+                # Force shapes to be safe
+                h_in = h.view(-1, 1)
+                dr_in = dr.view(-1, 1)
+                cmd = torch.cat([h_in, dr_in], dim=-1)
+                loss = model.loss(s, cmd)
             else:
                 # Fallback or error
                 loss = model.loss(s, dr)
@@ -58,11 +65,18 @@ def train_pessimist(cfg, dataset):
             for s, h, dr, a in val_loader:
                 s = s.to(device)
                 dr = dr.to(device)
+                h = h.to(device)
                 if cfg.method == "quantile":
                     pred = model(s)
                     loss = model.loss(pred, dr)
-                # elif cfg.method == "cvae":
-                #     loss = model.elbo(s, dr)
+                elif cfg.method == "cvae":
+                    loss = model.elbo(s, h, dr)
+                elif cfg.method == "diffusion":
+                    # Force shapes to be safe
+                    h_in = h.view(-1, 1)
+                    dr_in = dr.view(-1, 1)
+                    cmd = torch.cat([h_in, dr_in], dim=-1)
+                    loss = model.loss(s, cmd)
                 else:
                     loss = model.loss(s, dr)
                 total_val += float(loss.item()) * s.size(0)

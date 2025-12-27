@@ -46,7 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Cadre Théorique</a></li>
 <li class="toctree-l1"><a class="reference internal" href="methodology.html">Méthodologie Algorithmique</a></li>
-<li class="toctree-l1"><a class="reference internal" href="experiments.html">Expérimentations et Protocoles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Protocole Expérimental</a></li>
 <li class="toctree-l1"><a class="reference internal" href="results.html">Results &amp; Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="safety.html">Safety &amp; Robustness</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
@@ -95,38 +95,41 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Cadre Théorique</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="theory.html#safe-upside-down-rl">1. Safe Upside-Down RL</a></li>
-<li class="toctree-l2"><a class="reference internal" href="theory.html#modelisation-de-l-incertitude">2. Modélisation de l’Incertitude</a></li>
-<li class="toctree-l2"><a class="reference internal" href="theory.html#quantile-regression-pour-le-pessimisme">3. Quantile Regression pour le Pessimisme</a></li>
-<li class="toctree-l2"><a class="reference internal" href="theory.html#comparaison-theorique">4. Comparaison Théorique</a></li>
-<li class="toctree-l2"><a class="reference internal" href="theory.html#le-role-critique-de-la-donnee-garbage-in-garbage-out">5. Le Rôle Critique de la Donnée (“Garbage In, Garbage Out”)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#le-defi-du-rl-offline-the-optimism-trap">1. Le Défi du RL Offline : “The Optimism Trap”</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#upside-down-rl-fondement-de-notre-travail">2. Upside-Down RL : Fondement de Notre Travail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#etat-de-l-art-les-limites-existantes">3. État de l’Art : Les Limites Existantes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#pc-udrl-notre-approche">4. PC-UDRL : Notre Approche</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#les-trois-niveaux-de-sophistication">5. Les Trois Niveaux de Sophistication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="theory.html#bibliographie-liens-utiles">6. Bibliographie &amp; Liens Utiles</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="methodology.html">Méthodologie Algorithmique</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="methodology.html#pipeline-d-entrainement-standard">1. Pipeline d’Entraînement Standard</a></li>
-<li class="toctree-l2"><a class="reference internal" href="methodology.html#algorithme-de-projection-a-l-inference">2. Algorithme de Projection à l’Inférence</a></li>
-<li class="toctree-l2"><a class="reference internal" href="methodology.html#gestion-des-donnees-dataset">3. Gestion des Données (Dataset)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="methodology.html#architecture-reseau">4. Architecture Réseau</a></li>
-<li class="toctree-l2"><a class="reference internal" href="methodology.html#algorithme-complet-pseudo-code">5. Algorithme Complet (Pseudo-Code)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="methodology.html#au-dela-des-quantiles-modeles-generatifs-phase-3">6. Au-delà des Quantiles : Modèles Génératifs (Phase 3)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="methodology.html#architecture-systeme">1. Architecture Système</a></li>
+<li class="toctree-l2"><a class="reference internal" href="methodology.html#pipeline-d-entrainement">2. Pipeline d’Entraînement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="methodology.html#algorithme-d-inference-la-boucle-de-controle">3. Algorithme d’Inférence (La Boucle de Contrôle)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="methodology.html#details-d-implementation-hyperparametres">4. Détails d’Implémentation &amp; Hyperparamètres</a></li>
+<li class="toctree-l2"><a class="reference internal" href="methodology.html#gestion-des-donnees">5. Gestion des Données</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="experiments.html">Expérimentations et Protocoles</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="experiments.html#environnements-de-test">Environnements de Test</a></li>
-<li class="toctree-l2"><a class="reference internal" href="experiments.html#protocole-d-entrainement">Protocole d’Entraînement</a></li>
-<li class="toctree-l2"><a class="reference internal" href="experiments.html#metriques-d-evaluation">Métriques d’Évaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Protocole Expérimental</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="experiments.html#environnements-de-validation">1. Environnements de Validation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments.html#donnees-d-entrainement-offline">2. Données d’Entraînement (Offline)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments.html#configuration-de-l-entrainement">3. Configuration de l’Entraînement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiments.html#metriques-d-evaluation-la-trinite">4. Métriques d’Évaluation (La “Trinité”)</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="results.html">Results &amp; Benchmarks</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="results.html#phase-1-gridworld-validation">Phase 1: GridWorld Validation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="results.html#phase-2-lunarlander-baseline-comparison">Phase 2: LunarLander Baseline Comparison</a></li>
-<li class="toctree-l2"><a class="reference internal" href="results.html#visualizations">Visualizations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="results.html#phase-1-gridworld-validation-proof-of-concept">Phase 1: GridWorld Validation (Proof of Concept)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="results.html#analyse-critique-des-donnees-dataset-analysis">Analyse Critique des Données (Dataset Analysis)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="results.html#phase-2-4-lunarlander-continuous-benchmark">Phase 2-4: LunarLander Continuous Benchmark</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="safety.html">Safety &amp; Robustness</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="safety.html#structural-safety-by-design">Structural Safety by Design</a></li>
-<li class="toctree-l2"><a class="reference internal" href="safety.html#the-obedient-suicide-phenomenon">The “Obedient Suicide” Phenomenon</a></li>
-<li class="toctree-l2"><a class="reference internal" href="safety.html#comparison-with-action-space-constraints">Comparison with Action-Space Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="safety.html#robustness-metrics-cvar">Robustness Metrics: CVaR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="safety.html#the-fail-safe-phenomenon">The “Fail-Safe” Phenomenon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="safety.html#real-time-observability-the-pessimism-gap">Real-Time Observability: The Pessimism Gap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="safety.html#comparison-with-state-of-the-art">Comparison with State-of-the-Art</a></li>
 <li class="toctree-l2"><a class="reference internal" href="safety.html#references">References</a></li>
 </ul>
 </li>

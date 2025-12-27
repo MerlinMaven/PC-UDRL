@@ -1,125 +1,101 @@
 # Safe Upside-Down Reinforcement Learning (PC-UDRL)
+**Towards Safe Offline RL via Score-Based Manifold Guidance**
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-ee4c2c.svg)](https://pytorch.org/)
-[![Documentation](https://img.shields.io/badge/Docs-ReadTheDocs-green.svg)](docs_build/index.html)
+[![Status](https://img.shields.io/badge/Status-Validated-success.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-**PC-UDRL** (Pessimistic Command UDRL) is a novel Offline Reinforcement Learning framework that shifts the safety paradigm from *action-space regularization* (like CQL, IQL) to **command-space projection**.
-
-> **Core Idea**: Instead of asking an agent to "be careful" (policy constraint), we simply never ask it to do something unsafe (command constraint).
 
 ---
 
-## 🚀 Why PC-UDRL?
+## 🚀 Overview
 
-Traditional Offline RL methods (CQL, TD3+BC) often suffer from:
-*   **Conservatism**: Excessive regularization leads to poor performance.
-*   **Opaqueness**: Hard to interpret why an agent refuses to act.
-*   **Instability**: Value function estimation on OOD (Out-of-Distribution) data is prone to collapse.
+**PC-UDRL** is a novel safety framework for Offline Reinforcement Learning. It solves the **"Optimism Trap"**—where agents hallucinate high rewards for unsafe actions—by learning the geometry of the feasible command manifold.
 
-**Our Solution**:
-1.  **UDRL Backbone**: Transforming RL into Supervised Learning (Conditioned on Return & Horizon).
-2.  **Pessimistic Oracle**: A generative model (Quantile, CVAE, or Diffusion) that learns the "Feasible command manifold".
-3.  **Safety By Projection**: If a user asks for an unrealistic return (e.g., +200 safety score), the Oracle projects it down to the highest *safe* value (e.g., +150).
+Instead of constraining the *policy* (like CQL or TD3+BC), we constrain the *command*.
+> **"Don't tell the agent to be careful. Just don't ask it to do the impossible."**
+
+---
+
+## 🏆 Key Results (Phase 4)
+
+We compared three pessimistic oracles on **LunarLanderContinuous-v3**:
+1.  **Quantile Regression (Phase 2)**: *Too Conservative*. The agent survives but is paralyzed.
+2.  **Conditional VAE (Phase 3)**: *Too Optimistic*. The agent crashes while attempting impossible returns (+195).
+3.  **Score-Based Diffusion (Phase 4)**: *The Solution*. The model effectively diffuses unsafe commands back to the manifold of safety.
+
+### 🎥 The Evidence
+**Left**: Quantile (Paralyzed) | **Middle**: CVAE (Crash) | **Right**: Diffusion (Safe & Efficient)
+
+![Comparison Video](assets/compare_all_phases.mp4)
+*(Download video to view if not rendering)*
+
+### 📊 Performance Analysis
+Our Diffusion Pessimist (Green) maintains a **Dynamic Safety Gap**. It allows high performance when safe, but strictly caps commands when the state becomes dangerous.
+
+| Metric | Quantile (P2) | CVAE (P3) | Diffusion (P4) |
+| :--- | :---: | :---: | :---: |
+| ** Avg Return** | -200 (Low) | -150 (Crash) | **-110 (Best)** |
+| **Safety Gap** | High (Static) | Zero (unsafe) | **Adaptive** |
+
+![Returns](assets/p4_returns.png)
+
+---
+
+## 🔬 Scientific Report
+
+For a deep dive into the mathematics of **Score-Based Manifold Guidance** and the OOD Hole problem, please read the full report:
+
+👉 **[Read the Scientific Report](SCIENTIFIC_REPORT.md)**
 
 ---
 
 ## 🏗️ Architecture
 
-The framework operates in **2 distinct phases**:
-
-1.  **Pessimist Training**: Learning :math:`Q_\tau(s)` or :math:`p(r, h | s)` from the offline dataset.
-2.  **Agent Training**: Learning :math:`\pi(a | s, r, h)` via supervised learning.
-
-During inference, they work together:
+The framework decouples **Agency** (acting) from **Pessimism** (safety):
 
 ```python
-# The Safety Loop
-feasible_return = pessimist.predict_quantile(state, q=0.1)
-safe_command = min(target_return, feasible_return)  # The Safety Shield
-action = agent.act(state, horizon, safe_command)
+# The Safety Loop (Phase 4)
+user_command = (horizon=100, return=195)
+
+# 1. Pessimist: "Is this possible?"
+# (Diffusion Model projects unsafe command to manifold)
+safe_command = pessimist.project(state, user_command) 
+
+# 2. Agent: "I will execute the safe command."
+action = agent.act(state, safe_command)
 ```
-
----
-
-## 🛠️ Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/your-username/PC-UDRL.git
-cd PC-UDRL
-
-# Install dependencies (Virtual Environment recommended)
-pip install -r requirements.txt
-```
-
-**Requirements**: `torch`, `d3rlpy`, `gymnasium[box2d]`, `numpy`.
 
 ---
 
 ## ⚡ Quickstart
 
-### Phase 1: GridWorld Proof of Concept
-Validate the "Obedient Suicide" phenomenon on a simple discrete environment.
-
+### Installation
 ```bash
-# Generate random dataset
-python main.py --phase 1 --mode generate
-
-# Train Agent & Pessimist
-python main.py --phase 1 --mode train
-
-# Visualize results
-python main.py --phase 1 --mode eval
+git clone https://github.com/your-username/PC-UDRL.git
+cd PC-UDRL
+pip install -r requirements.txt
 ```
 
-### Phase 2: LunarLander Continuous
-Train on full physics environment with mixed synthetic data.
-
+### Reproduce Results
 ```bash
-# 1. Train Baselines (CQL, IQL, TD3+BC)
-python scripts/train_baselines.py --algo cql --epochs 30
-python scripts/train_baselines.py --algo iql --epochs 30
+# 1. Train the Diffusion Pessimist (Phase 4)
+python main.py --phase 4 --mode train
 
-# 2. Train PC-UDRL
-python main.py --phase 2 --mode train
-
-# 3. Compare Results
-python scripts/plot_results.py --phase 2
+# 2. Run the 3-Way Comparison
+python scripts/compare_all_phases.py
 ```
 
 ---
 
-## 📚 Documentation
+## 🗓️ Methodology Roadmap
 
-Full technical documentation is available in the `documentation/` folder (compiled with Sphinx).
-
-*   **[Theory](documentation/theory.rst)**: Aleatoric vs Epistemic Uncertainty, Quantile Regression.
-*   **[Methodology](documentation/methodology.rst)**: Architecture details, Pseudo-code.
-*   **[Experiments](documentation/experiments.rst)**: Hyperparameters, Dataset composition.
-
-To build the docs locally:
-```bash
-sphinx-build -b html documentation docs_build
-```
+- [x] **Phase 1: GridWorld**: Proving the "Deaf Agent" concept.
+- [x] **Phase 2: Quantile Baseline**: Establishing a conservative lower bound.
+- [x] **Phase 3: CVAE**: Proving that naive generation fails (Negative Result).
+- [x] **Phase 4: Diffusion**: **Final Validation** of Manifold Guidance.
+- [ ] **Future**: D4RL Benchmarks (Walker2d, Hopper).
 
 ---
 
-## 🗓️ Roadmap
-
-- [x] **Phase 1**: Discrete GridWorld Validation (Quantile).
-- [x] **Phase 2**: Continuous LunarLander (Quantile vs Baselines).
-- [ ] **Phase 3**: Advanced Generative Models (CVAE, Diffusion) for Multi-modal safety.
-- [ ] **Phase 4**: D4RL Benchmarks (MuJoCo).
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please check the `documentation/contributing.rst` guide (coming soon).
-
----
-
-**Author**: [Serraji Wiam]
-**Year**: 2025
+**Author**: [Serraji Wiam] | **Year**: 2025

@@ -37,7 +37,7 @@ def make_config(phase: int) -> Config:
         # Allows easy switching: method="cvae" or "diffusion"
         return Config(phase=3, env_id="LunarLanderContinuous-v3", method="cvae", episodes=1000)
     if phase == 4:
-        # Phase 4: D4RL Benchmarks
-        return Config(phase=4, env_id="hopper-medium-v2", method="quantile")
+        # Phase 4: Diffusion
+        return Config(phase=4, env_id="LunarLanderContinuous-v3", method="diffusion", episodes=1000, max_steps=1000)
     return Config()
 

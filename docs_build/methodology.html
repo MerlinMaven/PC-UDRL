@@ -18,7 +18,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Expérimentations et Protocoles" href="experiments.html" />
+    <link rel="next" title="Protocole Expérimental" href="experiments.html" />
     <link rel="prev" title="Cadre Théorique" href="theory.html" /> 
 </head>
 
@@ -47,15 +47,18 @@
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Cadre Théorique</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Méthodologie Algorithmique</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#pipeline-d-entrainement-standard">1. Pipeline d’Entraînement Standard</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#algorithme-de-projection-a-l-inference">2. Algorithme de Projection à l’Inférence</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#gestion-des-donnees-dataset">3. Gestion des Données (Dataset)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#architecture-reseau">4. Architecture Réseau</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#algorithme-complet-pseudo-code">5. Algorithme Complet (Pseudo-Code)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#au-dela-des-quantiles-modeles-generatifs-phase-3">6. Au-delà des Quantiles : Modèles Génératifs (Phase 3)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture-systeme">1. Architecture Système</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline-d-entrainement">2. Pipeline d’Entraînement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#phase-a-entrainement-de-l-agent-udrl">Phase A : Entraînement de l’Agent UDRL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#phase-b-entrainement-du-pessimiste">Phase B : Entraînement du Pessimiste</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="experiments.html">Expérimentations et Protocoles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#algorithme-d-inference-la-boucle-de-controle">3. Algorithme d’Inférence (La Boucle de Contrôle)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#details-d-implementation-hyperparametres">4. Détails d’Implémentation &amp; Hyperparamètres</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gestion-des-donnees">5. Gestion des Données</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Protocole Expérimental</a></li>
 <li class="toctree-l1"><a class="reference internal" href="results.html">Results &amp; Benchmarks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="safety.html">Safety &amp; Robustness</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
@@ -87,115 +90,224 @@
            <div itemprop="articleBody">
              
   <section id="methodologie-algorithmique">
-<h1>Méthodologie Algorithmique<a class="headerlink" href="#methodologie-algorithmique" title="Link to this heading">¶</a></h1>
-<p>Cette section détaille l’implémentation de l’architecture <strong>Pessimistic Command UDRL</strong>.</p>
-<section id="pipeline-d-entrainement-standard">
-<h2>1. Pipeline d’Entraînement Standard<a class="headerlink" href="#pipeline-d-entrainement-standard" title="Link to this heading">¶</a></h2>
-<p>L’entraînement se déroule en deux étapes indépendantes, ce qui garantit la stabilité du processus (pas de boucle de rétroaction instable comme en Actor-Critic).</p>
-<p><strong>Étape A : Entraînement de l’Agent UDRL</strong></p>
-<p>L’agent est un réseau de neurones <span class="math notranslate nohighlight">\(\pi_\phi(a | s, h, r)\)</span> entrainé par apprentissage supervisé.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pseudo-code PyTorch</span>
-<span class="n">loss</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">(</span><span class="n">pred_action</span><span class="p">,</span> <span class="n">target_action</span><span class="p">)</span>  <span class="c1"># Cas continu</span>
-<span class="n">loss</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropy</span><span class="p">(</span><span class="n">pred_logits</span><span class="p">,</span> <span class="n">target_action_idx</span><span class="p">)</span> <span class="c1"># Cas discret</span>
+<span id="methodology"></span><h1>Méthodologie Algorithmique<a class="headerlink" href="#methodologie-algorithmique" title="Link to this heading">¶</a></h1>
+<p>Cette section détaille l’implémentation technique de <strong>PC-UDRL</strong>. Elle complète le cadre théorique en se concentrant sur le “Comment” (Architecture, Hyperparamètres, Code) plutôt que le “Pourquoi”.</p>
+<section id="architecture-systeme">
+<h2>1. Architecture Système<a class="headerlink" href="#architecture-systeme" title="Link to this heading">¶</a></h2>
+<p>Le système repose sur deux réseaux de neurones distincts qui interagissent uniquement lors de l’inférence.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌───────────────────────────────────┐      ┌───────────────────────────────┐
+│           AGENT (Pilote)          │      │     PESSIMISTE (Garde-Fou)    │
+│  π(a | s, r_target, h_target)     │      │      P(valid_command | s)     │
+│           (Late Fusion)           │      │      (Quantile / CVAE / Diff) │
+└────────────────┬──────────────────┘      └──────────────┬────────────────┘
+                 │                                        │
+                 │ Action                                 │ Safety Projection
+                 ▼                                        ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                          ENVIRONNEMENT (Gym)                           │
+└────────────────────────────────────────────────────────────────────────┘
 </pre></div>
 </div>
-<p><strong>Hyperparamètres Clés (Phase 2)</strong> :
-*   Optimiseur : AdamW (<span class="math notranslate nohighlight">\(lr=3e^{-4}\)</span>, <span class="math notranslate nohighlight">\(\beta=(0.9, 0.999)\)</span>)
-*   Batch Size : 256
-*   Fonction d’activation : ReLU (couches cachées), Tanh (sortie continue)</p>
-<p><strong>Étape B : Entraînement du Pessimiste (Oracle)</strong></p>
-<p>Le pessimiste est un régresseur quantile <span class="math notranslate nohighlight">\(f_\psi(s) \rightarrow \hat{r}_\tau\)</span>.
-Il ne prend <em>pas</em> la commande en entrée, uniquement l’état. Il prédit “ce qui est possible depuis l’état <span class="math notranslate nohighlight">\(s\)</span>”.</p>
+<img alt="PC-UDRL System Architecture" class="no-scaled-link align-center" src="_images/system_architecture.png" style="width: 800px;" />
 </section>
-<section id="algorithme-de-projection-a-l-inference">
-<h2>2. Algorithme de Projection à l’Inférence<a class="headerlink" href="#algorithme-de-projection-a-l-inference" title="Link to this heading">¶</a></h2>
-<p>Lors de l’évaluation, l’agent ne reçoit jamais la commande brute de l’utilisateur. Elle passe par un filtre de sécurité.</p>
-<div class="math notranslate nohighlight">
-\[\text{SafePolicy}(s_t, r_{target}, h_{target}) = \pi_\phi \left( s_t, \min(r_{target}, Q_\tau(s_t)), h_{target} \right)\]</div>
-<p><strong>Détail du calcul du Pessimism Gap</strong> :
-Le <em>Pessimism Gap</em> quantifie l’intervention du système de sécurité.</p>
-<div class="math notranslate nohighlight">
-\[\Delta_{gap} = \max(0, r_{target} - Q_\tau(s_t))\]</div>
-<ul class="simple">
-<li><p>Si <span class="math notranslate nohighlight">\(\Delta_{gap} &gt; 0\)</span>, la commande était irréaliste/dangereuse.</p></li>
-<li><p>Si <span class="math notranslate nohighlight">\(\Delta_{gap} = 0\)</span>, la commande est jugée sûre.</p></li>
+<section id="pipeline-d-entrainement">
+<h2>2. Pipeline d’Entraînement<a class="headerlink" href="#pipeline-d-entrainement" title="Link to this heading">¶</a></h2>
+<p>L’entraînement est <strong>séquentiel et décorrélé</strong>, garantissant une grande stabilité.</p>
+<section id="phase-a-entrainement-de-l-agent-udrl">
+<h3>Phase A : Entraînement de l’Agent UDRL<a class="headerlink" href="#phase-a-entrainement-de-l-agent-udrl" title="Link to this heading">¶</a></h3>
+<p>L’agent apprend par <strong>Apprentissage Supervisé</strong> à imiter les actions qui ont mené à des retours donnés.</p>
+<ul>
+<li><p><strong>Entrée</strong> : État <span class="math notranslate nohighlight">\(s\)</span> (8 dim), Commande <span class="math notranslate nohighlight">\((r, h)\)</span> (2 dim).</p></li>
+<li><p><strong>Architecture</strong> : MLP “Late Fusion”.
+*   Les inputs sont traités séparément avant d’être concaténés.
+*   <em>Raison</em> : Évite que la commande (souvent de grande magnitude) n’écrase les features subtiles de l’état au début de l’entraînement.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Early Fusion vs Late Fusion</strong></p>
+<p>Une “Early Fusion” (concaténation immédiate) risque de laisser le réseau ignorer l’état au profit de la commande qui a une plus grande variance. La <strong>Late Fusion</strong> force le réseau à extraire des caractéristiques de l’état avant de considérer l’objectif.</p>
+</div>
+</li>
 </ul>
-</section>
-<section id="gestion-des-donnees-dataset">
-<h2>3. Gestion des Données (Dataset)<a class="headerlink" href="#gestion-des-donnees-dataset" title="Link to this heading">¶</a></h2>
-<p>La qualité du dataset conditionne la performance. Nous utilisons le format standard HDF5.</p>
-<p><strong>Structure des données</strong> :
-*   <cite>observations</cite>: <span class="math notranslate nohighlight">\((N, S_{dim})\)</span>
-*   <cite>actions</cite>: <span class="math notranslate nohighlight">\((N, A_{dim})\)</span>
-*   <cite>rewards</cite>: <span class="math notranslate nohighlight">\((N, 1)\)</span>
-*   <cite>terminals</cite>: <span class="math notranslate nohighlight">\((N, 1)\)</span></p>
-<p>L’horizon <span class="math notranslate nohighlight">\(h\)</span> et le retour cumulé <span class="math notranslate nohighlight">\(r\)</span> sont calculés à la volée lors du chargement (Lazy Loading) pour économiser la mémoire et permettre du <em>Hindsight Relabeling</em> dynamique si nécessaire.</p>
-</section>
-<section id="architecture-reseau">
-<h2>4. Architecture Réseau<a class="headerlink" href="#architecture-reseau" title="Link to this heading">¶</a></h2>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>State Input (8) ───► [FC 256] ──► [ReLU] ──┐
-                                           ▼
-Command Input (2) ─► [FC 256] ──► [ReLU] ──► [Concat] ──► [FC 256] ──► [Action Output]
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">UDRLAgent</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dim</span><span class="p">,</span> <span class="n">action_dim</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_net</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">state_dim</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cmd_net</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="n">action_dim</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">()</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
+        <span class="n">s_emb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_net</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="n">c_emb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd_net</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">s_emb</span><span class="p">,</span> <span class="n">c_emb</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>71: Cette architecture <em>Late Fusion</em> permet au réseau de traiter les caractéristiques de l’état indépendamment de la commande avant de les combiner pour la décision.</p>
 </section>
-<section id="algorithme-complet-pseudo-code">
-<h2>5. Algorithme Complet (Pseudo-Code)<a class="headerlink" href="#algorithme-complet-pseudo-code" title="Link to this heading">¶</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">Run_Episode</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">pessimist</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">target_return</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
-    <span class="n">state</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
-    <span class="n">horizon</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">max_steps</span>
+<section id="phase-b-entrainement-du-pessimiste">
+<h3>Phase B : Entraînement du Pessimiste<a class="headerlink" href="#phase-b-entrainement-du-pessimiste" title="Link to this heading">¶</a></h3>
+<p>Selon le niveau de sophistication (voir Théorie), l’architecture change.</p>
+<p><strong>Option 1 : Régresseur Quantile (MLP)</strong>
+*   <strong>Objectif</strong> : Prédire les quantiles <span class="math notranslate nohighlight">\(\tau\)</span> de la distribution des retours.
+*   <strong>Output</strong> : Vecteur de taille <span class="math notranslate nohighlight">\(N_{quantiles}\)</span>.
+*   <strong>Loss</strong> : Pinball Loss.</p>
+<p><strong>Option 2 : CVAE (Conditional VAE)</strong>
+*   <strong>Objectif</strong> : Apprendre la distribution jointe <span class="math notranslate nohighlight">\(p(r, h | s)\)</span>.
+*   <strong>Architecture</strong> :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>Encoder</em> : <span class="math notranslate nohighlight">\((s, r, h) \rightarrow (\mu, \sigma) \rightarrow z\)</span>.</p></li>
+<li><p><em>Decoder</em> : <span class="math notranslate nohighlight">\((s, z) \rightarrow (\hat{r}, \hat{h})\)</span>.</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p><strong>Loss</strong> : ELBO (Reconstruction + KL Divergence).</p></li>
+</ul>
+<p><strong>Option 3 : Diffusion Model (U-Net 1D)</strong>
+*   <strong>Objectif</strong> : Apprendre le gradient de score <span class="math notranslate nohighlight">\(\nabla_x \log p(x|s)\)</span>.
+*   <strong>Architecture</strong> :</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>Conditioning</em> : L’état <span class="math notranslate nohighlight">\(s\)</span> est injecté à chaque couche résiduelle (FiLM ou Concat).</p></li>
+<li><p><em>Time Embedding</em> : Sinusoidal (Transformer-style).</p></li>
+</ul>
+</div></blockquote>
+</section>
+</section>
+<section id="algorithme-d-inference-la-boucle-de-controle">
+<h2>3. Algorithme d’Inférence (La Boucle de Contrôle)<a class="headerlink" href="#algorithme-d-inference-la-boucle-de-controle" title="Link to this heading">¶</a></h2>
+<p>L’innovation principale réside dans la modification dynamique de la commande utilisateur <strong>avant</strong> qu’elle n’atteigne l’agent.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">run_inference</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">agent</span><span class="p">,</span> <span class="n">pessimist</span><span class="p">,</span> <span class="n">target_return</span><span class="p">,</span> <span class="n">target_horizon</span><span class="p">):</span>
+    <span class="n">state</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
-    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">max_steps</span><span class="p">):</span>
-        <span class="c1"># 1. Pessimistic Projection</span>
-        <span class="c1"># Le pessimiste prédit le retour réalisable (quantile 0.1)</span>
-        <span class="n">feasible_return</span> <span class="o">=</span> <span class="n">pessimist</span><span class="o">.</span><span class="n">predict_quantile</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="c1"># Commande initiale (souvent irréaliste, ex: +1000)</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">target_return</span><span class="p">,</span> <span class="n">target_horizon</span><span class="p">])</span>
 
-        <span class="c1"># 2. Safety Check (Min Operator)</span>
-        <span class="c1"># On ne demande jamais plus que ce qui est réalisable</span>
-        <span class="n">safe_command</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">target_return</span><span class="p">,</span> <span class="n">feasible_return</span><span class="p">)</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+        <span class="c1"># 1. PROJECTION DE SÉCURITÉ</span>
+        <span class="c1"># Le pessimiste &quot;corrige&quot; la commande en fonction de l&#39;état actuel</span>
+        <span class="k">if</span> <span class="n">use_diffusion</span><span class="p">:</span>
+            <span class="n">safe_cmd</span> <span class="o">=</span> <span class="n">pessimist</span><span class="o">.</span><span class="n">guided_projection</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># Quantile</span>
+            <span class="n">max_return</span> <span class="o">=</span> <span class="n">pessimist</span><span class="o">.</span><span class="n">predict_quantile</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+            <span class="c1"># On clamp (limite) principalement le retour attendu</span>
+            <span class="c1"># L&#39;horizon est une contrainte physique subie, pas un choix</span>
+            <span class="n">safe_cmd</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">safe_cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">max_return</span><span class="p">)</span>
 
-        <span class="c1"># 3. Action Selection</span>
-        <span class="c1"># L&#39;agent exécute la commande safe</span>
-        <span class="n">action</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">safe_command</span><span class="p">)</span>
+        <span class="c1"># 2. PRISE DE DÉCISION</span>
+        <span class="c1"># L&#39;agent obéit à la commande sécurisée</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">agent</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">safe_cmd</span><span class="p">)</span>
 
-        <span class="c1"># 4. Environment Step</span>
-        <span class="n">next_state</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="c1"># 3. INTERACTION</span>
+        <span class="n">next_state</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
 
-        <span class="c1"># 5. Update State</span>
+        <span class="c1"># 4. MISE À JOUR DE LA COMMANDE (Hindsight)</span>
+        <span class="c1"># On soustrait ce qu&#39;on vient de gagner pour obtenir le &quot;restant à faire&quot;</span>
+        <span class="n">cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="n">reward</span>  <span class="c1"># Return remaining</span>
+        <span class="n">cmd</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>       <span class="c1"># Horizon remaining</span>
         <span class="n">state</span> <span class="o">=</span> <span class="n">next_state</span>
-        <span class="n">horizon</span> <span class="o">-=</span> <span class="mi">1</span>
-        <span class="n">target_return</span> <span class="o">-=</span> <span class="n">reward</span> <span class="c1"># La commande restante diminue</span>
-
-        <span class="k">if</span> <span class="n">done</span><span class="p">:</span> <span class="k">break</span>
 </pre></div>
 </div>
-</section>
-<section id="au-dela-des-quantiles-modeles-generatifs-phase-3">
-<h2>6. Au-delà des Quantiles : Modèles Génératifs (Phase 3)<a class="headerlink" href="#au-dela-des-quantiles-modeles-generatifs-phase-3" title="Link to this heading">¶</a></h2>
-<p>Pourquoi passer de la régression quantile aux modèles génératifs ?</p>
-<p><strong>Limites de la Régression Quantile</strong></p>
-<ul class="simple">
-<li><p><strong>Hypothèse Unimodale</strong> : QR suppose implicitement que la distribution des retours est “simple” (un seul pic principal).</p></li>
-<li><p><strong>Manque de Précision</strong> : Elle ne donne qu’une borne (un chiffre), pas la forme de la distribution.</p></li>
-</ul>
-<p><strong>A. Conditional VAE (Variational Autoencoder)</strong>
-Le CVAE apprend à modéliser la densité complète <span class="math notranslate nohighlight">\(p(r, h | s)\)</span>.</p>
-<ul class="simple">
-<li><p><strong>Idée</strong> : Projeter la commande sur le <em>manifold</em> latent des commandes possibles.</p></li>
-<li><p><strong>Avantage</strong> : Permet de trouver la commande “la plus proche” dans l’espace latent continu, assurant une transition douce.</p></li>
-</ul>
-<p><strong>B. Diffusion Models (Denoising Diffusion)</strong>
-La méthode de l’état de l’art pour la génération.</p>
-<ul class="simple">
-<li><p><strong>Idée</strong> : Apprendre le gradient de la log-densité (Score Matching) des commandes <span class="math notranslate nohighlight">\(\nabla_{(r,h)} \log p(r, h | s)\)</span>.</p></li>
-<li><p><strong>Processus</strong> : On part d’une commande bruitée (random) et on la “débruite” itérativement conditionnellement à l’état <span class="math notranslate nohighlight">\(s\)</span>.</p></li>
-<li><p><strong>Résultat</strong> : Capacité à modéliser des distributions multimodales complexes (e.g., soit on gagne petit à coup sûr, soit on gagne gros avec risque, mais rien entre les deux).</p></li>
-</ul>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p>Pour les résultats expérimentaux de ces méthodes, voir la section “Phase 3” dans <span class="xref std std-ref">results</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>C’est cette boucle de <strong>Replanning Constant</strong> qui rend l’agent robuste. Même si la projection initiale est imparfaite, elle est réévaluée à chaque pas de temps (<span class="math notranslate nohighlight">\(50 Hz\)</span>).</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Stratégie “Greedy Maximization”</strong></p>
+<p>En fixant <span class="math notranslate nohighlight">\(r_{target}\)</span> à une valeur impossible (ex: +1000), nous forçons l’agent à chercher la <strong>meilleure performance possible</strong>.</p>
+<ul class="simple">
+<li><p><strong>Sans Pessimiste</strong> : L’agent hallucine et crashe (car +1000 est OOD).</p></li>
+<li><p><strong>Avec Pessimiste</strong> : L’agent reçoit la commande “faisable” la plus haute (ex: +230).</p></li>
+</ul>
+<p>Ainsi, PC-UDRL transforme un agent “Goal-Conditioned” en un optimiseur glouton robuste.</p>
+</div>
+</section>
+<section id="details-d-implementation-hyperparametres">
+<h2>4. Détails d’Implémentation &amp; Hyperparamètres<a class="headerlink" href="#details-d-implementation-hyperparametres" title="Link to this heading">¶</a></h2>
+<p>Pour assurer la reproductibilité des résultats présentés dans le rapport scientifique.</p>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">Spécifique : Régression Quantile (Phase 2)</span><a class="headerlink" href="#id1" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Paramètre</p></th>
+<th class="head"><p>Valeur</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Nb Quantiles</strong></p></td>
+<td><p>51 (<span class="math notranslate nohighlight">\(\tau \in \{0.02, ..., 0.98\}\)</span>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Hidden Layers</strong></p></td>
+<td><p>[256, 256] (MLP Standard)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Loss</strong></p></td>
+<td><p>Pinball Loss (Huberisée pour stabilité)</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">Spécifique : CVAE (Phase 3)</span><a class="headerlink" href="#id2" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Paramètre</p></th>
+<th class="head"><p>Valeur</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Latent Dim</strong></p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Hidden Layers</strong></p></td>
+<td><p>[128, 64] (Encoder &amp; Decoder)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Beta (KL Weight)</strong></p></td>
+<td><p>1.0 (Standard VAE) ou &gt;1 pour Disentanglement</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text">Spécifique : Modèle de Diffusion (Phase 4)</span><a class="headerlink" href="#id3" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Paramètre</p></th>
+<th class="head"><p>Valeur</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Diffusion Steps (Training)</strong></p></td>
+<td><p>1000</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Diffusion Steps (Inférence)</strong></p></td>
+<td><p>10 à 50 (Trade-off Latence/Précision)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Noise Schedule</strong></p></td>
+<td><p>Linear (<span class="math notranslate nohighlight">\(\beta_{start}=1e^{-4}, \beta_{end}=0.02\)</span>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Guidance</strong></p></td>
+<td><p>Strictement conditionné par l’état (Pas de CFG)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="gestion-des-donnees">
+<h2>5. Gestion des Données<a class="headerlink" href="#gestion-des-donnees" title="Link to this heading">¶</a></h2>
+<p>Le chargement des données utilise une stratégie <strong>Lazy Loading</strong> optimisée pour la RAM.</p>
+<ul class="simple">
+<li><p><strong>Format</strong> : HDF5 compressé (LZF).</p></li>
+<li><p><strong>Hindsight Relabeling</strong> : Calculé à la volée. Au lieu de stocker <span class="math notranslate nohighlight">\((r, h)\)</span> pour chaque transition, on stocke les trajectoires complètes et on calcule le retour restant <span class="math notranslate nohighlight">\(\sum_{t'=t}^T r_{t'}\)</span> lors du sampling du batch. Cela permet d’augmenter artificiellement la taille du dataset en échantillonnant différents horizons pour un même état.</p></li>
+</ul>
+<img alt="Hindsight Relabeling Mechanism" class="no-scaled-link align-center" src="_images/hindsight_relabeling.png" style="width: 600px;" />
 </section>
 </section>
 
@@ -204,7 +316,7 @@ La méthode de l’état de l’art pour la génération.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="theory.html" class="btn btn-neutral float-left" title="Cadre Théorique" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="experiments.html" class="btn btn-neutral float-right" title="Expérimentations et Protocoles" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="experiments.html" class="btn btn-neutral float-right" title="Protocole Expérimental" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

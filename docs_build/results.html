@@ -14,11 +14,12 @@
       <script src="_static/documentation_options.js?v=2709fde1"></script>
       <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Safety &amp; Robustness" href="safety.html" />
-    <link rel="prev" title="Expérimentations et Protocoles" href="experiments.html" /> 
+    <link rel="prev" title="Protocole Expérimental" href="experiments.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,14 +47,11 @@
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Cadre Théorique</a></li>
 <li class="toctree-l1"><a class="reference internal" href="methodology.html">Méthodologie Algorithmique</a></li>
-<li class="toctree-l1"><a class="reference internal" href="experiments.html">Expérimentations et Protocoles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Protocole Expérimental</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Results &amp; Benchmarks</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#phase-1-gridworld-validation">Phase 1: GridWorld Validation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#phase-2-lunarlander-baseline-comparison">Phase 2: LunarLander Baseline Comparison</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#visualizations">Visualizations</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#phase-1-side-by-side">Phase 1 Side-by-Side</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#phase-1-gridworld-validation-proof-of-concept">Phase 1: GridWorld Validation (Proof of Concept)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analyse-critique-des-donnees-dataset-analysis">Analyse Critique des Données (Dataset Analysis)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#phase-2-4-lunarlander-continuous-benchmark">Phase 2-4: LunarLander Continuous Benchmark</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="safety.html">Safety &amp; Robustness</a></li>
@@ -88,11 +86,14 @@
   <section id="results-benchmarks">
 <h1>Results &amp; Benchmarks<a class="headerlink" href="#results-benchmarks" title="Link to this heading">¶</a></h1>
 <p>This section presents the empirical results obtained during the validation phases.</p>
-<section id="phase-1-gridworld-validation">
-<h2>Phase 1: GridWorld Validation<a class="headerlink" href="#phase-1-gridworld-validation" title="Link to this heading">¶</a></h2>
+<section id="phase-1-gridworld-validation-proof-of-concept">
+<h2>Phase 1: GridWorld Validation (Proof of Concept)<a class="headerlink" href="#phase-1-gridworld-validation-proof-of-concept" title="Link to this heading">¶</a></h2>
+<p><strong>Objectif</strong> : Valider que l’agent UDRL apprend à naviguer dans un environnement simple avec des récompenses éparses, malgré un dataset purement aléatoire.</p>
+<a class="reference internal image-reference" href="../assets/eval_mean_return.png"><img alt="Performance GridWorld (Random Data)" class="align-center" src="../assets/eval_mean_return.png" style="width: 800px;" /></a>
 <ul class="simple">
-<li><p><strong>Experiment</strong>: 1000 random trajectories, sparse reward environment.</p></li>
-<li><p><strong>Comparison</strong>: Standard UDRL (Blind) vs PC-UDRL (Pessimistic).</p></li>
+<li><p><strong>Experiment</strong>: 1000 random trajectories.</p></li>
+<li><p><strong>Résultat</strong> : L’agent apprend à atteindre le but (Reward +1), mais reste incertain.</p></li>
+<li><p><strong>Observation</strong> : Le graphique ci-dessus montre une convergence lente et bruyante. La couverture d’états (<span class="math notranslate nohighlight">\(State Coverage\)</span>) est faible, ce qui limite la généralisation.</p></li>
 </ul>
 <table class="docutils align-default" id="id1">
 <caption><span class="caption-text">GridWorld Performance (20 Episodes)</span><a class="headerlink" href="#id1" title="Link to this table">¶</a></caption>
@@ -118,55 +119,71 @@
 </tr>
 </tbody>
 </table>
-<p><em>Observation</em>: While the standard agent occasionally gets lucky (20% success in dataset), it fails catastrophically often. The PC-UDRL agent never outperforms the “safe” baseline established by the pessimist, proving that the safety layer is effective (albeit overly conservative on random data).</p>
 </section>
-<section id="phase-2-lunarlander-baseline-comparison">
-<h2>Phase 2: LunarLander Baseline Comparison<a class="headerlink" href="#phase-2-lunarlander-baseline-comparison" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p><strong>Dataset</strong>: Mixed (50% Expert, 30% Medium, 20% Random).</p></li>
-<li><p><strong>Baselines</strong>: CQL, IQL, TD3+BC (d3rlpy implementations).</p></li>
-</ul>
-<p><em>Note: Training is currently in progress. Preliminary results will be updated below.</em></p>
+<section id="analyse-critique-des-donnees-dataset-analysis">
+<h2>Analyse Critique des Données (Dataset Analysis)<a class="headerlink" href="#analyse-critique-des-donnees-dataset-analysis" title="Link to this heading">¶</a></h2>
+<p>La différence de performance entre la Phase 1 et la Phase 2 s’explique par la qualité des données.</p>
+<aside class="topic">
+<p class="topic-title">Leçon : Garbage In, Garbage Out</p>
+<p>Un algorithme d’Offline RL ne peut pas inventer des compétences absentes des données.</p>
+<p><strong>1. Dataset Aléatoire (GridWorld)</strong>
+*   <strong>Composition</strong> : 99% d’échecs, 1% de succès fortuits.
+*   <strong>Problème</strong> : L’agent apprend principalement “ce qui ne marche pas”. Le manifold des possibles est dominé par l’échec.
+*   <strong>Conséquence</strong> : Le pessimiste apprend que <em>tout est dangereux</em>, paralysant l’agent.</p>
+<p><strong>2. Dataset Expert/Medium (LunarLander)</strong>
+*   <strong>Composition</strong> : Trajectoires d’un agent partiellement entraîné (Medium) ou optimal (Expert).
+*   <strong>Avantage</strong> : Le manifold contient des stratégies de succès. Le pessimiste peut distinguer “difficile mais faisable” de “impossible”.</p>
+</aside>
+</section>
+<section id="phase-2-4-lunarlander-continuous-benchmark">
+<h2>Phase 2-4: LunarLander Continuous Benchmark<a class="headerlink" href="#phase-2-4-lunarlander-continuous-benchmark" title="Link to this heading">¶</a></h2>
+<p>Nous passons à un environnement complexe (continu, physique) avec un dataset de qualité mixte.</p>
+<a class="reference internal image-reference" href="../assets/compare_p2_p3.png"><img alt="Comportement des Agents (Phase 2 vs Phase 3)" class="align-center" src="../assets/compare_p2_p3.png" style="width: 800px;" /></a>
+<p><strong>Comparaison des Approches</strong></p>
+<p>Nous avons testé trois paradigmes de modélisation du risque (Pessimisme) :</p>
+<ol class="arabic simple">
+<li><p><strong>Phase 2 (Quantile)</strong> : Statistiques scalaires robustes.</p></li>
+<li><p><strong>Phase 3 (CVAE)</strong> : Modèle génératif probabiliste (Voronoi-like).</p></li>
+<li><p><strong>Phase 4 (Diffusion)</strong> : Modèle basé sur le score (Gradient-based).</p></li>
+</ol>
+<p><strong>Résultats Quantitatifs (30 Époques)</strong></p>
 <table class="docutils align-default" id="id2">
-<caption><span class="caption-text">LunarLander Evaluation (Projected)</span><a class="headerlink" href="#id2" title="Link to this table">¶</a></caption>
+<caption><span class="caption-text">Comparaison Finale</span><a class="headerlink" href="#id2" title="Link to this table">¶</a></caption>
 <colgroup>
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 50%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 40%" />
 </colgroup>
 <thead>
-<tr class="row-odd"><th class="head"><p>Algorithm</p></th>
+<tr class="row-odd"><th class="head"><p>Méthode</p></th>
 <th class="head"><p>Avg Return</p></th>
-<th class="head"><p>Stability</p></th>
+<th class="head"><p>Pessimism Gap</p></th>
+<th class="head"><p>Comportement Observé</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><strong>CQL</strong></p></td>
-<td><p><em>Running…</em></p></td>
-<td><p>Expected: High stability, moderate return.</p></td>
+<tr class="row-even"><td><p><strong>Quantile (P2)</strong></p></td>
+<td><p>~ -200</p></td>
+<td><p>Élevé (Static)</p></td>
+<td><p><strong>Paralysie</strong>. L’agent est trop prudent, il atterrit prématurément ou refuse d’avancer.</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>IQL</strong></p></td>
-<td><p><em>Pending…</em></p></td>
-<td><p>Expected: Good generalization.</p></td>
+<tr class="row-odd"><td><p><strong>CVAE (P3)</strong></p></td>
+<td><p>~ -150</p></td>
+<td><p>~ 0.0 (Null)</p></td>
+<td><p><strong>Crash</strong>. Le modèle hallucine que +195 est possible. L’agent tente l’impossible et s’écrase.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>TD3+BC</strong></p></td>
-<td><p><em>Pending…</em></p></td>
-<td><p>Expected: Minimalist baseline.</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>PC-UDRL</strong></p></td>
-<td><p><em>Pending…</em></p></td>
-<td><p>Goal: Match baseline performance while offering command adjustability.</p></td>
+<tr class="row-even"><td><p><strong>Diffusion (P4)</strong></p></td>
+<td><p><strong>~ -110</strong></p></td>
+<td><p><strong>Adaptatif</strong></p></td>
+<td><p><strong>Sécurité Dynamique</strong>. Le modèle réduit la commande juste assez pour éviter le crash sans bloquer l’agent. Meilleur compromis.</p></td>
 </tr>
 </tbody>
 </table>
-</section>
-<section id="visualizations">
-<h2>Visualizations<a class="headerlink" href="#visualizations" title="Link to this heading">¶</a></h2>
-<section id="phase-1-side-by-side">
-<h3>Phase 1 Side-by-Side<a class="headerlink" href="#phase-1-side-by-side" title="Link to this heading">¶</a></h3>
-<a class="reference internal image-reference" href="../outputs/plots/phase1/comparison_preview.png"><img alt="Side-by-Side Comparison (Placeholder)" src="../outputs/plots/phase1/comparison_preview.png" style="width: 600px;" /></a>
-<p><em>(Video recordings are available in `runs/phase1/videos/`)</em></p>
-</section>
+<a class="reference internal image-reference" href="_images/p4_returns.png"><img alt="Courbes de Performance Comparées Phase 4" class="align-center" src="_images/p4_returns.png" style="width: 800px;" /></a>
+<p><strong>Analyse Visuelle (Video)</strong></p>
+<p>La vidéo ci-dessous illustre la supériorité de l’approche Diffusion (Phase 4), qui offre un atterrissage contrôlé contrairement au freinage brusque du Quantile.</p>
+<p><em>(Voir la vidéo `compare_all_phases.mp4` incluse dans les assets)</em></p>
 </section>
 </section>
 
@@ -174,7 +191,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="experiments.html" class="btn btn-neutral float-left" title="Expérimentations et Protocoles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="experiments.html" class="btn btn-neutral float-left" title="Protocole Expérimental" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="safety.html" class="btn btn-neutral float-right" title="Safety &amp; Robustness" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Expérimentations et Protocoles &mdash; PC-UDRL 0.1 documentation</title>
+  <title>Protocole Expérimental &mdash; PC-UDRL 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
@@ -47,18 +47,11 @@
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Cadre Théorique</a></li>
 <li class="toctree-l1"><a class="reference internal" href="methodology.html">Méthodologie Algorithmique</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Expérimentations et Protocoles</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#environnements-de-test">Environnements de Test</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#gridworld-environnement-discret">1. GridWorld (Environnement Discret)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#lunarlandercontinuous-v2-environnement-continu">2. LunarLanderContinuous-v2 (Environnement Continu)</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#protocole-d-entrainement">Protocole d’Entraînement</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#hyperparametres">Hyperparamètres</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#datasets">Datasets</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#metriques-d-evaluation">Métriques d’Évaluation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Protocole Expérimental</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#environnements-de-validation">1. Environnements de Validation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#donnees-d-entrainement-offline">2. Données d’Entraînement (Offline)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-de-l-entrainement">3. Configuration de l’Entraînement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metriques-d-evaluation-la-trinite">4. Métriques d’Évaluation (La “Trinité”)</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="results.html">Results &amp; Benchmarks</a></li>
@@ -81,7 +74,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Expérimentations et Protocoles</li>
+      <li class="breadcrumb-item active">Protocole Expérimental</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/experiments.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -91,44 +84,114 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="experimentations-et-protocoles">
-<h1>Expérimentations et Protocoles<a class="headerlink" href="#experimentations-et-protocoles" title="Link to this heading">¶</a></h1>
-<p>Cette section décrit rigoureusement les protocoles expérimentaux pour assurer la reproductibilité des résultats.</p>
-<section id="environnements-de-test">
-<h2>Environnements de Test<a class="headerlink" href="#environnements-de-test" title="Link to this heading">¶</a></h2>
-<section id="gridworld-environnement-discret">
-<h3>1. GridWorld (Environnement Discret)<a class="headerlink" href="#gridworld-environnement-discret" title="Link to this heading">¶</a></h3>
-<p>Environnement de navigation simple pour la preuve de concept.</p>
-<ul class="simple">
-<li><p><strong>Espace d’état</strong> : Coordonnées (x, y) normalisées <span class="math notranslate nohighlight">\([0, 1]^2\)</span>.</p></li>
-<li><p><strong>Espace d’action</strong> : Discret {Haut, Bas, Gauche, Droite}.</p></li>
-<li><p><strong>Dynamique</strong> : Déterministe sur les transitions.</p></li>
-<li><p><strong>Récompenses</strong> :</p>
+  <section id="protocole-experimental">
+<h1>Protocole Expérimental<a class="headerlink" href="#protocole-experimental" title="Link to this heading">¶</a></h1>
+<p>Cette section détaille le banc d’essai utilisé pour valider empiriquement les hypothèses théoriques de PC-UDRL. Nous suivons un protocole rigoureux inspiré des standards <strong>D4RL</strong> (Datasets for Deep Data-Driven RL).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Robustesse Statistique</strong></p>
+<p>Pour éviter les conclusions hâtives basées sur des “lucky seeds”, tous les résultats sont moyennés sur <strong>5 graines aléatoires indépendantes</strong> : <cite>{0, 42, 123, 2024, 999}</cite>.
+Les courbes de résultats affichent l’écart-type (<span class="math notranslate nohighlight">\(\pm 1 \sigma\)</span>) sous forme de zone ombrée.</p>
+</div>
+<section id="environnements-de-validation">
+<h2>1. Environnements de Validation<a class="headerlink" href="#environnements-de-validation" title="Link to this heading">¶</a></h2>
+<p>Nous testons notre approche sur deux niveaux de complexité : un environnement discret pour la preuve de concept, et un environnement continu dynamique pour la performance.</p>
+<aside class="topic">
+<p class="topic-title">A. GridWorld (Preuve de Concept)</p>
+<p>Un labyrinthe stochastique conçu pour tester la capacité de l’agent à naviguer en sécurité malgré un dataset de mauvaise qualité.</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 60%" />
+<col style="width: 40%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><ul class="simple">
+<li><p><strong>Espace d’état</strong> : Continu <span class="math notranslate nohighlight">\([0, 1]^2\)</span> (Coordonnées x, y).</p></li>
+<li><p><strong>Espace d’action</strong> : Discret 4-directions {Haut, Bas, Gauche, Droite}.</p></li>
+<li><p><strong>Fonction de Récompense</strong> :</p>
 <ul>
-<li><p>Pas de temps : -1</p></li>
-<li><p>Mur : -0.5</p></li>
-<li><p>Piège : -10 (Terminal)</p></li>
-<li><p>Objectif : +10 (Terminal)</p></li>
+<li><p><strong>Pas de temps</strong> : <span class="math notranslate nohighlight">\(-1\)</span> — <em>Incite à la rapidité</em></p></li>
+<li><p><strong>Mur</strong> : <span class="math notranslate nohighlight">\(-0.5\)</span> — <em>Pénalité de collision</em></p></li>
+<li><p><strong>Piège</strong> : <span class="math notranslate nohighlight">\(-10\)</span> — <em>Échec Terminal</em></p></li>
+<li><p><strong>Objectif</strong> : <span class="math notranslate nohighlight">\(+10\)</span> — <em>Succès Terminal</em></p></li>
 </ul>
 </li>
 </ul>
-</section>
-<section id="lunarlandercontinuous-v2-environnement-continu">
-<h3>2. LunarLanderContinuous-v2 (Environnement Continu)<a class="headerlink" href="#lunarlandercontinuous-v2-environnement-continu" title="Link to this heading">¶</a></h3>
-<p>Problème de contrôle optimal via le moteur physique Box2D.</p>
-<ul class="simple">
-<li><p><strong>Espace d’état</strong> : <span class="math notranslate nohighlight">\(\mathbb{R}^8\)</span> (Position, Vitesse, Angle, Vitesse Angulaire, Contact Sol).</p></li>
-<li><p><strong>Espace d’action</strong> : <span class="math notranslate nohighlight">\([-1, 1]^2\)</span> (Moteur Principal, Moteurs Latéraux).</p></li>
-<li><p><strong>Critère de succès</strong> : Atterrissage doux entre les drapeaux (Reward &gt; 200).</p></li>
+</td>
+<td><a class="reference internal image-reference" href="_images/gridworld_init.png"><img alt="GridWorld Environment" class="align-center" src="_images/gridworld_init.png" style="width: 100%;" /></a>
+</td>
+</tr>
+</tbody>
+</table>
+</aside>
+<aside class="topic">
+<p class="topic-title">B. LunarLander Continuous (Benchmark Physique)</p>
+<p>Problème de contrôle optimal via le moteur physique Box2D. L’objectif est d’atterrir en douceur entre deux drapeaux.</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 60%" />
+<col style="width: 40%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><ul class="simple">
+<li><p><strong>Espace d’état</strong> : <span class="math notranslate nohighlight">\(\mathbb{R}^8\)</span> (Pos, Vit, Angle, etc).</p></li>
+<li><p><strong>Espace d’action</strong> : <span class="math notranslate nohighlight">\([-1, 1]^2\)</span> (Moteurs).</p></li>
+<li><p><strong>Fonction de Récompense</strong> :</p>
+<ul>
+<li><p><strong>Distance/Vitesse</strong> : <span class="math notranslate nohighlight">\(\sim +140\)</span> — <em>Shaping reward optimal</em></p></li>
+<li><p><strong>Moteur Principal</strong> : <span class="math notranslate nohighlight">\(-0.3\)</span> / frame — <em>Coût énergétique</em></p></li>
+<li><p><strong>Atterrissage</strong> : <span class="math notranslate nohighlight">\(+100\)</span> — <em>Succès (Entre drapeaux)</em></p></li>
+<li><p><strong>Crash / Sortie</strong> : <span class="math notranslate nohighlight">\(-100\)</span> — <em>Échec</em></p></li>
 </ul>
+</li>
+</ul>
+</td>
+<td><a class="reference internal image-reference" href="_images/lunarlander_init.png"><img alt="LunarLander Environment" class="align-center" src="_images/lunarlander_init.png" style="width: 100%;" /></a>
+</td>
+</tr>
+</tbody>
+</table>
+</aside>
 </section>
+<section id="donnees-d-entrainement-offline">
+<h2>2. Données d’Entraînement (Offline)<a class="headerlink" href="#donnees-d-entrainement-offline" title="Link to this heading">¶</a></h2>
+<p>La qualité du dataset est le facteur déterminant en Offline RL.</p>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">Composition des Datasets</span><a class="headerlink" href="#id1" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Environnement</p></th>
+<th class="head"><p>Volume</p></th>
+<th class="head"><p>Composition Qualitative</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>GridWorld</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(1 \times 10^3\)</span></p></td>
+<td><p><strong>100% Random</strong>. (Exploration purement aléatoire). L’agent doit apprendre à atteindre un but qu’il n’a vu que par accident (1% des cas).</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>LunarLander</strong></p></td>
+<td><p><span class="math notranslate nohighlight">\(1 \times 10^5\)</span></p></td>
+<td><p><strong>Mixed (D4RL Style)</strong> :</p>
+<ul class="simple">
+<li><p>50% <strong>Expert</strong> (Politique PPO convergée)</p></li>
+<li><p>30% <strong>Medium-Replay</strong> (Replay buffer d’un agent en cours d’apprentissage)</p></li>
+<li><p>20% <strong>Random</strong> (Bruit pur pour la robustesse)</p></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="protocole-d-entrainement">
-<h2>Protocole d’Entraînement<a class="headerlink" href="#protocole-d-entrainement" title="Link to this heading">¶</a></h2>
-<section id="hyperparametres">
-<h3>Hyperparamètres<a class="headerlink" href="#hyperparametres" title="Link to this heading">¶</a></h3>
-<p>La table ci-dessous recense les hyperparamètres fixés pour toutes les expériences de la Phase 2.</p>
-<table class="docutils align-default">
+<section id="configuration-de-l-entrainement">
+<h2>3. Configuration de l’Entraînement<a class="headerlink" href="#configuration-de-l-entrainement" title="Link to this heading">¶</a></h2>
+<p>Les détails architecturaux sont dans la <a class="reference internal" href="methodology.html#methodology"><span class="std std-ref">Méthodologie Algorithmique</span></a>. Voici les spécificités de la boucle d’expérience.</p>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">Hyperparamètres de Run</span><a class="headerlink" href="#id2" title="Link to this table">¶</a></caption>
 <colgroup>
 <col style="width: 40%" />
 <col style="width: 60%" />
@@ -139,53 +202,40 @@
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><strong>Optimizer</strong></p></td>
-<td><p>Adam</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Learning Rate</strong></p></td>
-<td><p><span class="math notranslate nohighlight">\(3 \times 10^{-4}\)</span></p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Batch Size</strong></p></td>
-<td><p>256</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Network Architecture</strong></p></td>
-<td><p>MLP (2 hidden layers, 256 units)</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Activation</strong></p></td>
-<td><p>ReLU</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Horizon Max (Training)</strong></p></td>
+<tr class="row-even"><td><p><strong>Horizon Max (Training)</strong></p></td>
 <td><p>200 (GridWorld), 1000 (LunarLander)</p></td>
-</tr>
-<tr class="row-even"><td><p><strong>Pessimist Quantile</strong> (<span class="math notranslate nohighlight">\(\tau\)</span>)</p></td>
-<td><p>0.9 (GridWorld), 0.7 (LunarLander)</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>Training Epochs</strong></p></td>
 <td><p>30 (Checkpointing tous les 10)</p></td>
 </tr>
 </tbody>
 </table>
-</section>
-<section id="datasets">
-<h3>Datasets<a class="headerlink" href="#datasets" title="Link to this heading">¶</a></h3>
-<p>Pour assurer la robustesse <em>Offline</em>, nous générons des datasets synthétiques :</p>
+<div class="tip admonition">
+<p class="admonition-title">Insight Expert : Le Réglage du Pessimisme</p>
+<p>Le choix du quantile <span class="math notranslate nohighlight">\(\tau\)</span> n’est pas arbitraire, il reflète notre <strong>confiance en l’environnement</strong> :</p>
 <ul class="simple">
-<li><p><strong>Random (GridWorld)</strong> : Politique uniforme. Couverture faible de l’objectif (20%).</p></li>
-<li><p><strong>Mixed (LunarLander)</strong> : Mélange conçu pour le benchmark D4RL :
-*   50% Trajectoires Expertes (PPO).
-*   30% Trajectoires Moyennes (Expert bruité, <span class="math notranslate nohighlight">\(\epsilon=0.3\)</span>).
-*   20% Trajectoires Aléatoires.</p></li>
+<li><p><strong>GridWorld</strong> (<span class="math notranslate nohighlight">\(\tau=0.9\)</span>) : Environnement déterministe. On peut être “optimiste” (quantile haut) car <span class="math notranslate nohighlight">\(s \to s'\)</span> est prévisible.</p></li>
+<li><p><strong>LunarLander</strong> (<span class="math notranslate nohighlight">\(\tau=0.7\)</span>) : Environnement bruité et dynamique. Il faut être “prudent” (quantile plus bas) pour se prémunir contre les erreurs de modélisation.</p></li>
 </ul>
+</div>
 </section>
-</section>
-<section id="metriques-d-evaluation">
-<h2>Métriques d’Évaluation<a class="headerlink" href="#metriques-d-evaluation" title="Link to this heading">¶</a></h2>
-<p>Nous évaluons les agents selon trois axes :</p>
-<ol class="arabic simple">
-<li><p><strong>Performance Pure</strong> : Retour moyen normalisé sur 20 épisodes.</p></li>
-<li><p><strong>Sécurité</strong> : Nombre d’états terminaux “catastrophiques” visités.</p></li>
-<li><p><strong>Respect de la Commande</strong> : Erreur quadratique entre le retour demandé et obtenu (pour les commandes réalisables).</p></li>
-</ol>
+<section id="metriques-d-evaluation-la-trinite">
+<h2>4. Métriques d’Évaluation (La “Trinité”)<a class="headerlink" href="#metriques-d-evaluation-la-trinite" title="Link to this heading">¶</a></h2>
+<p>Nous évaluons la performance système selon trois axes complémentaires :</p>
+<ul>
+<li><p><strong>Performance (D4RL Score)</strong> : L’efficacité pure.</p>
+<div class="math notranslate nohighlight">
+\[Score = 100 \times \frac{R_{agent} - R_{random}}{R_{expert} - R_{random}}\]</div>
+</li>
+<li><p><strong>Robustesse (CVaR)</strong> : La sécurité dans le pire des cas.</p>
+<div class="math notranslate nohighlight">
+\[ext{CVaR}_{0.1} = \mathbb{E}[R \mid R \le \text{VaR}_{0.1}]\]</div>
+</li>
+<li><p><strong>Monitoring (Pessimism Gap)</strong> : La capacité de détection d’anomalies.</p>
+<div class="math notranslate nohighlight">
+\[\Delta = r_{target} - r_{safe}\]</div>
+</li>
+</ul>
 </section>
 </section>
 

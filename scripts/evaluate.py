@@ -9,7 +9,8 @@ import numpy as np
 
 from pc_udrl.agents.udrl_agent import UDRLAgent
 from pc_udrl.pessimists.quantile import QuantileRegressor
-# from pc_udrl.pessimists.cvae import CVAEPessimist
+from pc_udrl.pessimists.cvae import CVAEPessimist
+from pc_udrl.pessimists.diffusion import CondDiffusion
 from pc_udrl.envs.gridworld import GridWorld
 from pc_udrl.envs.gym_wrappers import make_env
 from pc_udrl.data.dataset import OfflineDataset
@@ -41,9 +42,13 @@ def _build_models(cfg, env):
     agent = UDRLAgent(state_dim, action_dim, discrete, hidden_dim=cfg.hidden_dim).to(device)
     if cfg.method == "quantile":
         pessimist = QuantileRegressor(state_dim, hidden_dim=cfg.hidden_dim, q=cfg.pessimist_quantile, cfg=cfg)
+    elif cfg.method == "cvae":
+        pessimist = CVAEPessimist(state_dim, latent_dim=cfg.cvae_latent_dim, hidden_dim=cfg.hidden_dim, cfg=cfg)
+    elif cfg.method == "diffusion":
+        pessimist = CondDiffusion(state_dim, hidden_dim=cfg.hidden_dim, cfg=cfg, timesteps=100)
     else:
         # pessimist = CVAEPessimist(state_dim, latent_dim=cfg.cvae_latent_dim, hidden_dim=cfg.hidden_dim, cfg=cfg)
-        raise ValueError("Only quantile supported in Phase 1 isolated")
+        raise ValueError("Only quantile, cvae and diffusion supported")
 
     # Load checkpoints
     run_dir = os.path.join(cfg.runs_dir, f"phase{cfg.phase}")
@@ -90,13 +95,16 @@ def evaluate_agent(cfg, use_pessimism: bool = True, capture_video: bool = False,
             st = torch.tensor(s, dtype=torch.float32, device=device).unsqueeze(0)
             
             # Pessimism Logic
+            # Pessimism Logic
             if cfg.method == "quantile":
                 cap = pessimist(st)
-            # elif cfg.method == "cvae":
-            #     cap = pessimist.sample_cap(st, nsamples=16, percentile=cfg.pessimist_quantile)
+            elif cfg.method == "cvae":
+                cap = pessimist.sample_cap(st, nsamples=16, percentile=cfg.pessimist_quantile)
+            elif cfg.method == "diffusion":
+                cap = pessimist.sample_cap(st, nsamples=16, percentile=cfg.pessimist_quantile)
             else:
                 # cap = pessimist.sample_cap(st, nsamples=16, percentile=cfg.pessimist_quantile)
-                raise ValueError("Only quantile supported")
+                raise ValueError("Only quantile, cvae and diffusion supported")
             
             cap_val = float(cap.squeeze().detach().cpu().item())
             gap = max(0.0, target_return - cap_val)

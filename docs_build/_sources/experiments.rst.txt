@@ -1,83 +1,132 @@
 
-Expérimentations et Protocoles
-==============================
+Protocole Expérimental
+======================
 
-Cette section décrit rigoureusement les protocoles expérimentaux pour assurer la reproductibilité des résultats.
+Cette section détaille le banc d'essai utilisé pour valider empiriquement les hypothèses théoriques de PC-UDRL. Nous suivons un protocole rigoureux inspiré des standards **D4RL** (Datasets for Deep Data-Driven RL).
 
-Environnements de Test
-----------------------
+.. note:: **Robustesse Statistique**
 
-1. GridWorld (Environnement Discret)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Pour éviter les conclusions hâtives basées sur des "lucky seeds", tous les résultats sont moyennés sur **5 graines aléatoires indépendantes** : `{0, 42, 123, 2024, 999}`.
+    Les courbes de résultats affichent l'écart-type (:math:`\pm 1 \sigma`) sous forme de zone ombrée.
 
-Environnement de navigation simple pour la preuve de concept.
+1. Environnements de Validation
+-------------------------------
 
-*   **Espace d'état** : Coordonnées (x, y) normalisées :math:`[0, 1]^2`.
-*   **Espace d'action** : Discret {Haut, Bas, Gauche, Droite}.
-*   **Dynamique** : Déterministe sur les transitions.
-*   **Récompenses** :
+Nous testons notre approche sur deux niveaux de complexité : un environnement discret pour la preuve de concept, et un environnement continu dynamique pour la performance.
 
-    *   Pas de temps : -1
-    *   Mur : -0.5
-    *   Piège : -10 (Terminal)
-    *   Objectif : +10 (Terminal)
+.. topic:: A. GridWorld (Preuve de Concept)
 
-2. LunarLanderContinuous-v2 (Environnement Continu)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Un labyrinthe stochastique conçu pour tester la capacité de l'agent à naviguer en sécurité malgré un dataset de mauvaise qualité.
 
-Problème de contrôle optimal via le moteur physique Box2D.
+    .. list-table::
+       :widths: 60 40
+       :class: borderless
 
-*   **Espace d'état** : :math:`\mathbb{R}^8` (Position, Vitesse, Angle, Vitesse Angulaire, Contact Sol).
-*   **Espace d'action** : :math:`[-1, 1]^2` (Moteur Principal, Moteurs Latéraux).
-*   **Critère de succès** : Atterrissage doux entre les drapeaux (Reward > 200).
+       * - *   **Espace d'état** : Continu :math:`[0, 1]^2` (Coordonnées x, y).
+           *   **Espace d'action** : Discret 4-directions {Haut, Bas, Gauche, Droite}.
+           *   **Fonction de Récompense** :
 
-Protocole d'Entraînement
-------------------------
+               *   **Pas de temps** : :math:`-1` — *Incite à la rapidité*
+               
+               *   **Mur** : :math:`-0.5` — *Pénalité de collision*
+               
+               *   **Piège** : :math:`-10` — *Échec Terminal*
+               
+               *   **Objectif** : :math:`+10` — *Succès Terminal*
 
-Hyperparamètres
-~~~~~~~~~~~~~~~
+         - .. image:: ../assets/gridworld_init.png
+              :width: 100%
+              :alt: GridWorld Environment
+              :align: center
 
-La table ci-dessous recense les hyperparamètres fixés pour toutes les expériences de la Phase 2.
+.. topic:: B. LunarLander Continuous (Benchmark Physique)
 
-.. list-table::
+    Problème de contrôle optimal via le moteur physique Box2D. L'objectif est d'atterrir en douceur entre deux drapeaux.
+
+    .. list-table::
+       :widths: 60 40
+       :class: borderless
+
+       * - *   **Espace d'état** : :math:`\mathbb{R}^8` (Pos, Vit, Angle, etc).
+           *   **Espace d'action** : :math:`[-1, 1]^2` (Moteurs).
+           *   **Fonction de Récompense** :
+
+               *   **Distance/Vitesse** : :math:`\sim +140` — *Shaping reward optimal*
+               
+               *   **Moteur Principal** : :math:`-0.3` / frame — *Coût énergétique*
+               
+               *   **Atterrissage** : :math:`+100` — *Succès (Entre drapeaux)*
+               
+               *   **Crash / Sortie** : :math:`-100` — *Échec*
+
+         - .. image:: ../assets/lunarlander_init.png
+              :width: 100%
+              :alt: LunarLander Environment
+              :align: center
+
+2. Données d'Entraînement (Offline)
+-----------------------------------
+
+La qualité du dataset est le facteur déterminant en Offline RL.
+
+.. list-table:: Composition des Datasets
+   :widths: 20 20 60
+   :header-rows: 1
+
+   * - Environnement
+     - Volume
+     - Composition Qualitative
+   * - **GridWorld**
+     - :math:`1 \times 10^3`
+     - **100% Random**. (Exploration purement aléatoire). L'agent doit apprendre à atteindre un but qu'il n'a vu que par accident (1% des cas).
+   * - **LunarLander**
+     - :math:`1 \times 10^5`
+     - **Mixed (D4RL Style)** :
+       
+       * 50% **Expert** (Politique PPO convergée)
+       * 30% **Medium-Replay** (Replay buffer d'un agent en cours d'apprentissage)
+       * 20% **Random** (Bruit pur pour la robustesse)
+
+3. Configuration de l'Entraînement
+----------------------------------
+
+Les détails architecturaux sont dans la :ref:`methodology`. Voici les spécificités de la boucle d'expérience.
+
+.. list-table:: Hyperparamètres de Run
    :header-rows: 1
    :widths: 40 60
 
    * - Paramètre
      - Valeur
-   * - **Optimizer**
-     - Adam
-   * - **Learning Rate**
-     - :math:`3 \times 10^{-4}`
-   * - **Batch Size**
-     - 256
-   * - **Network Architecture**
-     - MLP (2 hidden layers, 256 units)
-   * - **Activation**
-     - ReLU
    * - **Horizon Max (Training)**
      - 200 (GridWorld), 1000 (LunarLander)
-   * - **Pessimist Quantile** (:math:`\tau`)
-     - 0.9 (GridWorld), 0.7 (LunarLander)
    * - **Training Epochs**
      - 30 (Checkpointing tous les 10)
 
-Datasets
-~~~~~~~~
+.. admonition:: Insight Expert : Le Réglage du Pessimisme
+    :class: tip
 
-Pour assurer la robustesse *Offline*, nous générons des datasets synthétiques :
+    Le choix du quantile :math:`\tau` n'est pas arbitraire, il reflète notre **confiance en l'environnement** :
 
-*   **Random (GridWorld)** : Politique uniforme. Couverture faible de l'objectif (20%).
-*   **Mixed (LunarLander)** : Mélange conçu pour le benchmark D4RL :
-    *   50% Trajectoires Expertes (PPO).
-    *   30% Trajectoires Moyennes (Expert bruité, :math:`\epsilon=0.3`).
-    *   20% Trajectoires Aléatoires.
+    *   **GridWorld** (:math:`\tau=0.9`) : Environnement déterministe. On peut être "optimiste" (quantile haut) car :math:`s \to s'` est prévisible.
+    *   **LunarLander** (:math:`\tau=0.7`) : Environnement bruité et dynamique. Il faut être "prudent" (quantile plus bas) pour se prémunir contre les erreurs de modélisation.
 
-Métriques d'Évaluation
-----------------------
+4. Métriques d'Évaluation (La "Trinité")
+-----------------------------------------
 
-Nous évaluons les agents selon trois axes :
+Nous évaluons la performance système selon trois axes complémentaires :
 
-1.  **Performance Pure** : Retour moyen normalisé sur 20 épisodes.
-2.  **Sécurité** : Nombre d'états terminaux "catastrophiques" visités.
-3.  **Respect de la Commande** : Erreur quadratique entre le retour demandé et obtenu (pour les commandes réalisables).
+*   **Performance (D4RL Score)** : L'efficacité pure.
+    
+    .. math::
+        Score = 100 \times \frac{R_{agent} - R_{random}}{R_{expert} - R_{random}}
+
+*   **Robustesse (CVaR)** : La sécurité dans le pire des cas.
+    
+    .. math::
+      	ext{CVaR}_{0.1} = \mathbb{E}[R \mid R \le \text{VaR}_{0.1}]
+
+*   **Monitoring (Pessimism Gap)** : La capacité de détection d'anomalies.
+    
+    .. math::
+        \Delta = r_{target} - r_{safe}

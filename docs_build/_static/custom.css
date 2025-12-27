@@ -1,1 +1,71 @@
-/* This file intentionally left blank. */
+
+/* Moderniser les Admonitions (Danger, Note, Tip) */
+.admonition {
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none !important; /* Enlever la bordure par défaut brute */
+    border-left: 5px solid; /* Garder juste la barre gauche de couleur */
+    background-color: #f8f9fa; /* Fond très léger */
+}
+
+/* Danger / Error */
+.admonition.danger, .admonition.error {
+    background-color: #fff5f5;
+    border-left-color: #e53e3e;
+}
+.admonition.danger .admonition-title, .admonition.error .admonition-title {
+    background-color: #e53e3e;
+    color: white;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+/* Ajouter une icône via CSS pour Danger */
+.admonition.danger .admonition-title::before {
+    content: "⚠️ ";
+    margin-right: 8px;
+}
+
+/* Tip / Astuce */
+.admonition.tip {
+    background-color: #f0fff4;
+    border-left-color: #38a169;
+}
+.admonition.tip .admonition-title {
+    background-color: #38a169;
+    color: white;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+/* Topic (Le Dilemme...) - Style spécial "Card" */
+.topic {
+    background-color: #ebf8ff;
+    border: 1px solid #bee3f8;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.topic .topic-title {
+    color: #2b6cb0;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #bee3f8;
+    padding-bottom: 5px;
+}
+
+/* Améliorer les titres globaux */
+h1 {
+    color: #2d3748;
+    border-bottom: 3px solid #4a5568 !important;
+    padding-bottom: 10px;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
+h2 {
+    color: #2c5282;
+    border-bottom: 1px solid #cbd5e0;
+    padding-bottom: 5px;
+    margin-top: 40px;
+}
