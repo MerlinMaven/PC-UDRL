@@ -1,3 +1,4 @@
+sphinxcontrib-mermaid
 numpy<2
 torch==2.2.2
 gymnasium==0.29.1
